@@ -13,13 +13,8 @@ class LightProviderRESTMock(LightProviderREST):
     
     # In the mock implementation, the resources are not retrieved through HTTP
     
-    @property
-    def lamp_resource(self):
-        return self._lamp_resource
-        
-    @property
-    def light_resource(self):
-        return self._light_resource
+    def get_resource(self, url):
+        return self.resources[url]
     
     def start(self):
         pass

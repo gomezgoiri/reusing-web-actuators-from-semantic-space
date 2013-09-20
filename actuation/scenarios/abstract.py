@@ -5,22 +5,38 @@ Created on Sep 19, 2013
 '''
 
 from abc import ABCMeta, abstractmethod
-from actuation.api import Node
 
 
 class AbstractSimulation(object):
     
     __metaclass__ = ABCMeta
     
+    
+    def __init__(self):
+        self.nodes = {}
+    
+    def run(self):
+        '''
+        Runs the scenario where the consumer tries to change the light in the environment.
+        '''
+        self.configure()
+        
+        for node in self.nodes:
+            node.start()
+        
+        self.execute()
+        
+        for node in self.nodes:
+            node.start()
+            
+        self.check()
+    
     @abstractmethod
     def configure(self):
         pass
     
     @abstractmethod
-    def run(self):
-        '''
-        Runs the scenario where the consumer tries to change the light in the environment.
-        '''
+    def execute(self):
         pass
     
     @abstractmethod

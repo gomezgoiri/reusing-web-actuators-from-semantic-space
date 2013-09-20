@@ -7,15 +7,25 @@ from abc import ABCMeta
 from actuation.api import Node
 
 
-class LightProviderREST(Node):
+class RESTProvider(Node):
+    
+    def __init__(self):
+        super(RESTProvider,self).__init__()
+        self.resources = {} # Key: url (partial or not); Value: resource
+
+class LightProviderREST(RESTProvider):
     
     __metaclass__ = ABCMeta
     
     def __init__(self, lamp_resource, light_resource):
-        self._lamp_resource = lamp_resource
-        self._light_resource = light_resource
+        super(LightProviderREST,self).__init__()
+        
+        # TODO it should correspond with the description!
+        self.resources['/lamp'] = lamp_resource
+        self.resources['/lamp/light'] = light_resource
 
-class LightConsumerREST(object):
+
+class LightConsumerREST(Node):
     
     __metaclass__ = ABCMeta
 
