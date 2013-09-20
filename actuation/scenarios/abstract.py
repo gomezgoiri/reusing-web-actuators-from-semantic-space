@@ -8,7 +8,7 @@ from abc import ABCMeta, abstractmethod
 from actuation.api import Node
 
 
-class AbstractSimulation(Node):
+class AbstractSimulation(object):
     
     __metaclass__ = ABCMeta
     

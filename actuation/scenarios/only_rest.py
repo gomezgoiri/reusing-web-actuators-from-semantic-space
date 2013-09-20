@@ -16,8 +16,7 @@ class OnlyRESTDevicesSimulator(AbstractSimulation):
         lamp_resource = LampResource( self.input_folder + "lamp_desc.n3" )
         light_resource = LightResource( self.input_folder + "light_get.n3",
                                         self.input_folder + "light_post.n3",
-                                        None, # ret_get_tpl_fp
-                                        None, # ret_post_tpl_fp
+                                        self.input_folder + "light_get_ret.n3.tpl",
                                         self.output_folder )
         self.mp = LightProviderRESTMock( lamp_resource, light_resource )
         

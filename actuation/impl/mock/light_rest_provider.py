@@ -9,7 +9,7 @@ from actuation.api.light_rest import LightProviderREST
 class LightProviderRESTMock(LightProviderREST):
     
     def __init__(self, lamp_resource, light_resource):
-        super(LightProviderREST,self).__init__(lamp_resource, light_resource)
+        super(LightProviderRESTMock,self).__init__(lamp_resource, light_resource)
     
     # In the mock implementation, the resources are not retrieved through HTTP
     
@@ -20,3 +20,9 @@ class LightProviderRESTMock(LightProviderREST):
     @property
     def light_resource(self):
         return self._light_resource
+    
+    def start(self):
+        pass
+    
+    def stop(self):
+        pass
