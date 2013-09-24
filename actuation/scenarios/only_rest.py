@@ -8,9 +8,8 @@ from actuation.impl.mock.lamp_rest_consumer import LampConsumerRESTMock
 class OnlyRESTDevicesSimulator(AbstractSimulation):
     
     def __init__(self, input_folder, output_folder, reasoner):
-        super(OnlyRESTDevicesSimulator, self).__init__()
+        super(OnlyRESTDevicesSimulator, self).__init__( output_folder )
         self.input_folder = input_folder
-        self.output_folder = output_folder
         self.reasoner = reasoner
     
     @property    
@@ -54,6 +53,8 @@ if __name__ == '__main__':
                       help="Output folder where the processed results will be written.")
     parser.add_option("-e", "--euler", dest = "euler", default='../../../../',
                       help = "Path to Euler.jar")
+    parser.add_option("-c", "--clean", dest = "clean", default="True",
+                      help = "Specifies whether the output directory should be clean after the execution.")
     (options, args) = parser.parse_args()
     
     from actuation.proofs.reasoner import EulerReasoner
@@ -62,4 +63,8 @@ if __name__ == '__main__':
     sim = OnlyRESTDevicesSimulator( append_slash_if_absent( options.input ),
                                     append_slash_if_absent( options.output ),
                                     reasoner )
+    
     sim.run()
+    
+    if options.clean.lower() == "true":
+        sim.clean()

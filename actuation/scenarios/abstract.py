@@ -5,6 +5,8 @@ Created on Sep 19, 2013
 '''
 
 from abc import ABCMeta, abstractmethod
+from tempfile import mkdtemp
+from shutil import rmtree
 
 
 class AbstractSimulation(object):
@@ -12,8 +14,12 @@ class AbstractSimulation(object):
     __metaclass__ = ABCMeta
     
     
-    def __init__(self):
+    def __init__(self, output_folder):
         self.nodes = {}
+        self.output_folder = mkdtemp( dir = output_folder ) + "/"
+    
+    # new possible phase
+    # def initialize(self):  
     
     def run(self):
         '''
@@ -42,3 +48,6 @@ class AbstractSimulation(object):
     @abstractmethod
     def check(self):
         pass
+    
+    def clean(self):
+        rmtree( self.output_folder )
