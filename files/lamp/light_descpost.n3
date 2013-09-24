@@ -1,0 +1,43 @@
+@prefix actuators: <http://example.org/lamp/actuators/>.
+@prefix http: <http://www.w3.org/2011/http#>.
+@prefix ssn: <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#>.
+@prefix dbpedia: <http://dbpedia.org/resource/>.
+@prefix dbpedia-owl: <http://dbpedia.org/ontology/>.
+@prefix sweet: <http://sweet.jpl.nasa.gov/>.
+@prefix ucum: <http://purl.oclc.org/NET/muo/ucum/>.
+@prefix dul: <http://www.loa.istc.cnr.it/ontologies/DUL.owl#>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix frap: <http://purl.org/frap/>.
+@prefix op: <http://www.w3.org/2000/10/swap/math#>.
+
+
+# lamp/actuators/light/
+
+{
+	# limitarse a describir el desired_value  
+	_:obsv a ssn:ObservationValue ;
+	      dul:isClassifiedBy  ucum:lux ;
+	      dul:hasDataValue ?desired_value .
+}
+=>
+{
+  _:request http:methodName "POST";
+            http:requestURI "lamp/actuators/light" ;
+            http:body ?desired_value;
+            http:resp [ http:body ?lightObs ].
+  
+  actuators:light ssn:madeObservation ?lightObs .
+
+  # We need to provide this too to specify that the new resource's value would be the provided one!
+  
+  ?lightObs a ssn:Observation ;
+         ssn:observedProperty sweet:Light ;
+         ssn:observedBy actuators:light ; # redundant madeObservation
+         ssn:observationResult ?so .
+     
+  ?so ssn:hasValue ?ov .
+
+  ?ov a ssn:ObservationValue ;
+      dul:isClassifiedBy ucum:lux ;
+      dul:hasDataValue ?desired_value . # without this, there is no link between the goal and the need of POSTing this
+}.

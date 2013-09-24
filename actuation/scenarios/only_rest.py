@@ -1,14 +1,14 @@
 from optparse import OptionParser
 from actuation.scenarios.abstract import AbstractSimulation
-from actuation.impl.resources import LampResource, LightResource
 from actuation.utils.files import append_slash_if_absent
-from actuation.impl.mock.light_rest_provider import LightProviderRESTMock
-from actuation.impl.mock.light_rest_consumer import LightConsumerRESTMock
+from actuation.impl.mock.lamp_rest_provider import LampProviderRESTMock
+from actuation.impl.mock.lamp_rest_consumer import LampConsumerRESTMock
 
 
 class OnlyRESTDevicesSimulator(AbstractSimulation):
     
     def __init__(self, input_folder, output_folder, reasoner):
+        super(OnlyRESTDevicesSimulator, self).__init__()
         self.input_folder = input_folder
         self.output_folder = output_folder
         self.reasoner = reasoner
@@ -27,17 +27,13 @@ class OnlyRESTDevicesSimulator(AbstractSimulation):
     
     @lp.setter
     def lp(self, value):
-        self.nodes["provider"] = value    
+        self.nodes["provider"] = value
     
     def configure(self):
-        lamp_resource = LampResource( self.input_folder + "lamp_desc.n3" )
-        light_resource = LightResource( self.input_folder + "light_get.n3",
-                                        self.input_folder + "light_post.n3",
-                                        self.input_folder + "light_get_ret.n3.tpl",
-                                        self.output_folder )
-        self.lp = LightProviderRESTMock( lamp_resource, light_resource )
-        self.lc = LightConsumerRESTMock()
+        self.lp = LampProviderRESTMock( self.input_folder, self.output_folder )
+        self.lc = LampConsumerRESTMock( self.output_folder, self.reasoner)
         self.lc.discover( self.lp )
+        print self.lp.get_resource("/lamp/light").get()
     
     def execute(self):
         '''

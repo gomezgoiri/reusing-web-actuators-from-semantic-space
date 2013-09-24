@@ -21,13 +21,13 @@ class AbstractSimulation(object):
         '''
         self.configure()
         
-        for node in self.nodes:
+        for node in self.nodes.itervalues():
             node.start()
         
         self.execute()
         
-        for node in self.nodes:
-            node.start()
+        for node in self.nodes.itervalues():
+            node.stop()
             
         self.check()
     
