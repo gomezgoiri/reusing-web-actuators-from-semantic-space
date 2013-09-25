@@ -1,3 +1,4 @@
+@prefix : <http://example.org/>.
 @prefix actuators: <http://example.org/lamp/actuators/>.
 @prefix http: <http://www.w3.org/2011/http#>.
 @prefix ssn: <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#>.
@@ -15,7 +16,8 @@
 
 {
 	# limitarse a describir el desired_value  
-	_:obsv a ssn:ObservationValue ;
+	?obsv a ssn:ObservationValue ;
+	      a frap:Preference ; # without this, it enters in an endless loop (the consequence activates this rule again)
 	      dul:isClassifiedBy  ucum:lux ;
 	      dul:hasDataValue ?desired_value .
 }
@@ -23,7 +25,7 @@
 {
   _:request http:methodName "POST";
             http:requestURI "lamp/actuators/light" ;
-            http:body ?desired_value;
+            http:body ?obsv ;
             http:resp [ http:body ?lightObs ].
   
   actuators:light ssn:madeObservation ?lightObs .

@@ -22,7 +22,7 @@
   _:request http:methodName "GET" ;
             http:requestURI ?light_obs ;
             #http:body actuators:light ;
-            http:resp [ http:body light_obs ].
+            http:resp [ http:body ?light_obs ].
   
   ?light_obs a  ssn:Observation ;
          ssn:observedProperty  sweet:Light ;

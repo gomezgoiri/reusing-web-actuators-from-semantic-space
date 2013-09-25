@@ -64,7 +64,7 @@ class LampResource(Resource):
     
     def __init__(self, input_folder):
         super(LampResource, self).__init__()
-        self._get_ret_file_path = input_folder + "lamp_desc.n3"
+        self._get_ret_file_path = input_folder + "lamp_ret.n3"
     
     def get(self):
         return self._get_ret_file_path

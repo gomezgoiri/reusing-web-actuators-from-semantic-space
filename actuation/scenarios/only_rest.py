@@ -1,4 +1,5 @@
 from optparse import OptionParser
+from actuation.proofs.reasoner import EulerReasoner
 from actuation.scenarios.abstract import AbstractSimulation
 from actuation.utils.files import append_slash_if_absent
 from actuation.impl.mock.lamp_rest_provider import LampProviderRESTMock
@@ -7,10 +8,10 @@ from actuation.impl.mock.lamp_rest_consumer import LampConsumerRESTMock
 
 class OnlyRESTDevicesSimulator(AbstractSimulation):
     
-    def __init__(self, input_folder, output_folder, reasoner):
+    def __init__(self, input_folder, output_folder, path_to_reasoner):
         super(OnlyRESTDevicesSimulator, self).__init__( output_folder )
         self.input_folder = input_folder
-        self.reasoner = reasoner
+        self.reasoner = EulerReasoner( path_to_reasoner )
     
     @property    
     def lc(self):
@@ -32,14 +33,14 @@ class OnlyRESTDevicesSimulator(AbstractSimulation):
         self.lp = LampProviderRESTMock( self.input_folder, self.output_folder )
         self.lc = LampConsumerRESTMock( self.output_folder, self.reasoner)
         self.lc.discover( self.lp )
-        print self.lp.get_resource("/lamp/light").get()
+        #print self.lp.get_resource("/lamp/light").get()
     
     def execute(self):
         '''
         Executes the scenario where the consumer tries to change the light in the environment.
         '''
         # do sth
-        pass
+        self.lc.achieve_goal( self.input_folder + "light_goal.n3" )
     
     def check(self):
         pass
@@ -51,18 +52,15 @@ if __name__ == '__main__':
                       help="Base directory where all the files used in the simulation are stored.")
     parser.add_option("-o", "--output", dest="output", default="/tmp",
                       help="Output folder where the processed results will be written.")
-    parser.add_option("-e", "--euler", dest = "euler", default='../../../../',
+    parser.add_option("-e", "--euler", dest = "euler", default='../../lib',
                       help = "Path to Euler.jar")
     parser.add_option("-c", "--clean", dest = "clean", default="True",
                       help = "Specifies whether the output directory should be clean after the execution.")
     (options, args) = parser.parse_args()
     
-    from actuation.proofs.reasoner import EulerReasoner
-    reasoner = EulerReasoner( options.euler )
-    
     sim = OnlyRESTDevicesSimulator( append_slash_if_absent( options.input ),
                                     append_slash_if_absent( options.output ),
-                                    reasoner )
+                                    append_slash_if_absent( options.euler ) )
     
     sim.run()
     

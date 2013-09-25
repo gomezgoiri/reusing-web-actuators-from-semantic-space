@@ -13,13 +13,14 @@ class LampConsumerRESTMock(LampConsumerREST):
     
     def __init__(self, output_folder, reasoner):
         super(LampConsumerRESTMock,self).__init__()
-        self._nodes = []
-        self.descriptions = []
         self.output_folder = output_folder
         self.reasoner = reasoner
+        
+        self._nodes = []
+        self.descriptions = set()
+        self.base_knowledge = set()
     
     # In the mock implementation, the resources are not retrieved through HTTP
-    
     def discover(self, node):
         self._nodes.append( node )  
     
@@ -31,27 +32,39 @@ class LampConsumerRESTMock(LampConsumerREST):
                     if hasattr(resource, 'options'): # maybe it does not implement it
                         opts = resource.options()
                         if hasattr(opts, '__iter__'):
-                            self.descriptions.extend( opts )
+                            self.descriptions.update( opts ) # == extend in lists
                         else:
-                            self.descriptions.append( opts )
+                            self.descriptions.add( opts ) # == append in lists
+     
+    def _obtain_base_knowledge(self):
+        '''Crawling to obtain base knowledge (done by an spider, autonomous agent)'''
+        for node in self._nodes:
+            if isinstance(node, RESTProvider):
+                # In the real implementation the resources must be discovered using HTTP
+                for resource in node.get_all_resources():
+                    if hasattr(resource, 'get'): # maybe it does not implement it
+                        opts = resource.get()
+                        self.base_knowledge.add( opts ) # == append in lists
     
     def start(self):
         self._obtain_resource_descriptions()
+        self._obtain_base_knowledge()
     
     def stop(self):
         pass
     
     def achieve_goal(self, query_goal_path):
-        plan_filepath = self.create_plan(query_goal_path, self.descriptions)
+        plan_filepath = self._create_plan(query_goal_path, self.descriptions.union( self.base_knowledge ) )
+        self._process_plan( plan_filepath )
         
-    def create_plan(self, query_goal_path, rule_paths):
+    def _create_plan(self, query_goal_path, rule_paths):
         output_file_path = self.reasoner.query_proofs( rule_paths ,
                                                  query_goal_path,
                                                  self.output_folder + "/plan.n3" ) # Write the plan into a file
         return output_file_path
 
-    def process_plan(self):
-        uie = UsefulInformationExtractor( self.plan_path, self.output_folder, self.reasoner )
+    def _process_plan(self, plan_filepath):
+        uie = UsefulInformationExtractor( plan_filepath, self.output_folder, self.reasoner )
         uie.extract_all()
         
         self.lemma_graph = LemmaPrecedencesGraph(self.output_folder + "/" + UsefulInformationExtractor.get_output_filename("precedences"))

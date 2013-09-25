@@ -14,14 +14,16 @@
 '''
 
 import subprocess
+from actuation.utils.files import append_slash_if_absent
+
 
 class EulerReasoner(object):
     '''
     Gateway to call to euler/EYE resoner
     '''
 
-    def __init__( self, euler_path='../../../../../' ):
-        self.euler_path = euler_path + "" if euler_path.endswith("/") else "/"
+    def __init__( self, euler_path ):
+        self.euler_path = append_slash_if_absent( euler_path ) # TODO should be checked previously
     
     def _generic_query( self, input_files, query_file, optional_args, output_file_path = None ):
         '''

@@ -20,7 +20,7 @@
       
 actuators:light a ssn:Sensor;
   ssn:observes sweet:Light ; # redundant: madeObservation and observedProperty defined
-  ssn:onPlatform :lamp . # redundant: inverse of attachedSystem
+  ssn:onPlatform :lamp ; # redundant: inverse of attachedSystem
   lookfor:last measures:last .
 
 
