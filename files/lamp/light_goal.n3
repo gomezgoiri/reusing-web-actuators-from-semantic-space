@@ -13,19 +13,9 @@
 
 
 # Description of the preference
-:obsv a ssn:ObservationValue ;
+_:obsv a ssn:ObservationValue, frap:Preference ;
       dul:isClassifiedBy  ucum:lux ;
       dul:hasDataValue 19 .
-
-
-
-:preference a frap:Preference ;
-    frap:about :pab .
-
-:pab a frap:Pattern ;
-    a ssn:ObservationValue ;
-    dul:isClassifiedBy  ucum:lux ;
-    dul:hasDataValue 20 .
 
 
 

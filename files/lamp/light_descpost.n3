@@ -15,11 +15,12 @@
 # lamp/actuators/light/
 
 {
-	# limitarse a describir el desired_value  
-	?obsv a ssn:ObservationValue ;
-	      a frap:Preference ; # without this, it enters in an endless loop (the consequence activates this rule again)
-	      dul:isClassifiedBy  ucum:lux ;
-	      dul:hasDataValue ?desired_value .
+  # limitarse a describir el desired_value
+  ?obsv a ssn:ObservationValue ;
+      # without this, the consequence activates this rule again and it enters in an endless loop
+      a frap:Preference ;
+      dul:isClassifiedBy  ucum:lux ;
+      dul:hasDataValue ?desired_value .
 }
 =>
 {
