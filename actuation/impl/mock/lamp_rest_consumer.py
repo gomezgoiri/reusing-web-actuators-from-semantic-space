@@ -11,8 +11,9 @@ from actuation.proofs.interpretation.lemma_parser import LemmaParser
 
 class LampConsumerRESTMock(LampConsumerREST):
     
-    def __init__(self, output_folder, reasoner):
+    def __init__(self, input_folder, output_folder, reasoner):
         super(LampConsumerRESTMock,self).__init__()
+        self.preference_file = input_folder + "additional_info.n3"
         self.output_folder = output_folder
         self.reasoner = reasoner
         
@@ -45,6 +46,7 @@ class LampConsumerRESTMock(LampConsumerREST):
                     if hasattr(resource, 'get'): # maybe it does not implement it
                         opts = resource.get()
                         self.base_knowledge.add( opts ) # == append in lists
+        self.base_knowledge.add( self.preference_file )
     
     def start(self):
         self._obtain_resource_descriptions()
@@ -60,19 +62,19 @@ class LampConsumerRESTMock(LampConsumerREST):
     def _create_plan(self, query_goal_path, rule_paths):
         output_file_path = self.reasoner.query_proofs( rule_paths ,
                                                  query_goal_path,
-                                                 self.output_folder + "/plan.n3" ) # Write the plan into a file
+                                                 self.output_folder + "plan.n3" ) # Write the plan into a file
         return output_file_path
 
     def _process_plan(self, plan_filepath):
         uie = UsefulInformationExtractor( plan_filepath, self.output_folder, self.reasoner )
         uie.extract_all()
         
-        self.lemma_graph = LemmaPrecedencesGraph(self.output_folder + "/" + UsefulInformationExtractor.get_output_filename("precedences"))
+        self.lemma_graph = LemmaPrecedencesGraph(self.output_folder + UsefulInformationExtractor.get_output_filename("precedences"))
         
-        lp = LemmaParser( self.output_folder + "/" + UsefulInformationExtractor.get_output_filename("services"),
-                          self.output_folder + "/" + UsefulInformationExtractor.get_output_filename("bindings"),
-                          self.output_folder + "/" + UsefulInformationExtractor.get_output_filename("evidences") )
+        lp = LemmaParser( self.output_folder + UsefulInformationExtractor.get_output_filename("services"),
+                          self.output_folder + UsefulInformationExtractor.get_output_filename("bindings"),
+                          self.output_folder + UsefulInformationExtractor.get_output_filename("evidences") )
         self.lemma_graph.add_lemmas_info( lp.lemmas )
         self.lemma_graph.create_nx_graph()
-        #self.lemma_graph.to_image( output_file = options.output + "/lemma_precedences.png" )
-        #self.lemma_graph.to_gml( output_file = self.output_folder + "/lemma_precedences.gml" )
+        #self.lemma_graph.to_image( output_file = self.output_folder + "lemma_precedences.png" )
+        #self.lemma_graph.to_gml( output_file = self.output_folder + "lemma_precedences.gml" )

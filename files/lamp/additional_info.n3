@@ -12,27 +12,7 @@
 @prefix frap: <http://purl.org/frap/>.
 
 
-{ # Analogy: SPARQL WHERE
-
-  # More things could be specified here: location, whatever...
-  
-  actuators:light ssn:madeObservation ?light .
-  
-  ?light ssn:observedProperty  sweet:Light ;
-         ssn:observationResult ?so .
-  
-  ?so ssn:hasValue ?ov .
-  
-  ?ov a ssn:ObservationValue ;
+# Description of the preference
+_:obsv a ssn:ObservationValue, frap:Preference ;
       dul:isClassifiedBy  ucum:lux ;
-      dul:hasDataValue 19 .
-  
-  #?val op:greaterThan 19 .
-
-}
-=>
-{ # Analogy: SPARQL CONSTRUCT
-
-  ?ov  dul:hasDataValue  ?val .
-
-}.
+      dul:hasDataValue 19 . 

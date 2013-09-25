@@ -35,15 +35,15 @@ class UsefulInformationExtractor(object):
         self.input_file = input_file
         self.output_folder = output_folder
         self.reasoner = reasoner
-        self.path_to_goals = path.dirname(__file__) + "/goal_rules"
+        self.path_to_goals = path.dirname(__file__) + "/goal_rules/"
     
     def start(self):
-        self.tmp_file = self.output_folder + "/unblanked.n3"
+        self.tmp_file = self.output_folder + "unblanked.n3"
         unblank_lemmas( self.input_file, self.tmp_file )
         self.default_qe = QueryExecutor( self.tmp_file, self.reasoner )
         
     def stop(self):
-        remove( self.tmp_file )
+        remove( self.tmp_file ) # not really necessary since the folder may be destroyed afterwards
     
     @staticmethod
     def get_input_filename(identifier):
@@ -56,8 +56,8 @@ class UsefulInformationExtractor(object):
     def extract_item(self, identifier):
         input_name = UsefulInformationExtractor.get_input_filename(identifier)
         output_name = UsefulInformationExtractor.get_output_filename(identifier)
-        self.default_qe.execute_and_save( self.path_to_goals + "/" + input_name,
-                                          self.output_folder + "/" + output_name )
+        self.default_qe.execute_and_save( self.path_to_goals + input_name,
+                                          self.output_folder + output_name )
     
     def extract_all(self):
         self.start()
