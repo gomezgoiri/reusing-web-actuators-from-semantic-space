@@ -5,7 +5,7 @@ Created on Sep 20, 2013
 '''
 
 from actuation.api.lamp_rest import RESTProvider, LampConsumerREST
-from actuation.proofs.preprocess import UsefulInformationExtractor
+from actuation.proofs.preprocess import Preprocessor
 from actuation.proofs.plan import LemmaPrecedencesGraph
 from actuation.proofs.parsers.lemmas import LemmasParser
 
@@ -66,14 +66,13 @@ class LampConsumerRESTMock(LampConsumerREST):
         return output_file_path
 
     def _process_plan(self, plan_filepath):
-        uie = UsefulInformationExtractor( plan_filepath, self.output_folder, self.reasoner )
-        uie.extract_all()
+        Preprocessor.preprocess( plan_filepath, self.output_folder, self.reasoner )
         
-        lemma_graph = LemmaPrecedencesGraph(self.output_folder + UsefulInformationExtractor.get_output_filename("precedences"))
+        lemma_graph = LemmaPrecedencesGraph(self.output_folder + Preprocessor.get_output_filename("precedences"))
         
-        lp = LemmasParser( self.output_folder + UsefulInformationExtractor.get_output_filename("services"),
-                          self.output_folder + UsefulInformationExtractor.get_output_filename("bindings"),
-                          self.output_folder + UsefulInformationExtractor.get_output_filename("evidences") )
+        lp = LemmasParser( self.output_folder + Preprocessor.get_output_filename("services"),
+                          self.output_folder + Preprocessor.get_output_filename("bindings"),
+                          self.output_folder + Preprocessor.get_output_filename("evidences") )
         lemma_graph.add_lemmas_info( lp.lemmas )
         lemma_graph.create_nx_graph()
         #lemma_graph.to_image( output_file = self.output_folder + "lemma_precedences.png" )

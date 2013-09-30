@@ -17,7 +17,7 @@ from optparse import OptionParser
 from rdflib import Graph, Namespace
 import networkx as nx
 import matplotlib.pyplot as plt
-from actuation.proofs.preprocess import UsefulInformationExtractor
+from actuation.proofs.preprocess import Preprocessor
 from actuation.proofs.parsers.lemmas import LemmasParser
 
 r_ns = Namespace("http://www.w3.org/2000/10/swap/reason#")
@@ -135,8 +135,8 @@ if __name__ == '__main__':
     rg = LemmaPrecedencesGraph( options.input )
     
     if options.filter_path is not None:
-        lp = LemmasParser( options.filter_path + "/" + UsefulInformationExtractor.get_output_filename("services"),
-                              options.filter_path + "/" + UsefulInformationExtractor.get_output_filename("bindings") )
+        lp = LemmasParser( options.filter_path + "/" + Preprocessor.get_output_filename("services"),
+                              options.filter_path + "/" + Preprocessor.get_output_filename("bindings") )
         rg.add_lemmas_info( lp.lemmas )
     
     rg.create_nx_graph()

@@ -13,82 +13,43 @@
  @author: Aitor Gómez Goiri <aitor.gomez@deusto.es>
 '''
 
-import re
-from os import remove, path
+from os import path
 from optparse import OptionParser
-from actuation.proofs import Namespaces
 
-class UsefulInformationExtractor(object):
+
+class Preprocessor(object):
     '''
     This class acts as an entry point to generate the processed files from pre-proofs.
     
     These temporary files are generated simply because they are easier to parse.
     '''
-    
+        
     EXTRACTIONS = {# identifier: (input_filename, output_filename)
                    "precedences": ("lemma_precedences.n3", "precedences.txt"),
                    "bindings": ("rest_bindings.n3", "bindings.txt"),
-                   "lemmas": ("lemma_precedences.n3", "lemmas.txt"),
                    "services": ("rest_services.n3", "services.txt"),
                    "evidences": ("non_lemma_evidences.n3", "evidences.txt"),
                    }
     
-    def __init__(self, input_file, output_folder, reasoner):
-        self.input_file = input_file
-        self.output_folder = output_folder
-        self.reasoner = reasoner
-        self.path_to_goals = path.dirname(__file__) + "/goal_rules/"
-        self.tmp_file = self.output_folder + "unblanked.n3"
-    
-    # TODO Damn it, I should have used Node.skolemize(authority='http://rdlib.net/') !
-    # Otherwise BIG TODO => use FileUtils!
-    def unblank_lemmas(self):
-        fake_prefix = r"@prefix fake: <%s>." % Namespaces.FAKE
-        with open (self.input_file, "r") as input_file:
-            data = re.sub('_:lemma(?P<num>\d+)', 'fake:lemma\g<num>', input_file.read())
-            # Or...
-            # g = Graph()
-            # g.parse( StringIO( fake_prefix + "\n" + data ), format="n3" )
-            # print g.serialize(format="n3")
-            with open (self.tmp_file, "w") as output_file:
-                output_file.write( fake_prefix + "\n" + data)
-    
-    def _execute_and_save(self, query_file, output_file_path):
-        self.reasoner.query( self.input_file, query_file, output_file_path )
-    
-    def _execute_and_show(self, query_file):
-        print self.reasoner.query( self.input_file, query_file )
-    
-    def start(self):
-        self.unblank_lemmas()
-        
-    def stop(self):
-        remove( self.tmp_file ) # not really necessary since the folder may be destroyed afterwards
-    
-    @staticmethod
-    def _get_input_filename(identifier):
-        return UsefulInformationExtractor.EXTRACTIONS[identifier][0]
+    PATH_TO_GOALS = path.dirname(__file__) + "/goal_rules/"
     
     @staticmethod
     def get_output_filename(identifier):
-        return UsefulInformationExtractor.EXTRACTIONS[identifier][1]
+        return Preprocessor.EXTRACTIONS[identifier][1]
     
-    def extract_item(self, identifier):
-        input_name = UsefulInformationExtractor._get_input_filename(identifier)
-        output_name = UsefulInformationExtractor.get_output_filename(identifier)
-        self._execute_and_save( self.path_to_goals + input_name,
-                                          self.output_folder + output_name )
-    
-    def extract_all(self):
-        self.start()
+    @staticmethod
+    def preprocess(input_file, output_folder, reasoner):
+        '''
+        This method generates the simplified files which will be parsed afterwards.
+        '''
+        path_to_goals = path.dirname(__file__) + "/goal_rules/"
         
-        #self.extract_item("lemmas") # no longer needed, I think # TODO check
-        self.extract_item("precedences")
-        self.extract_item("bindings")
-        self.extract_item("services")
-        self.extract_item("evidences")
-        
-        self.stop()
+        for input_filename, output_filename in Preprocessor.EXTRACTIONS.itervalues():
+            # extract item
+            print "Processing %s > %s" % (path_to_goals + input_filename, output_folder + output_filename)
+            reasoner.query( input_file,
+                            path_to_goals + input_filename,
+                            output_folder + output_filename )
 
 
 
@@ -104,6 +65,5 @@ if __name__ == '__main__':
 
     from actuation.proofs.reason import EulerReasoner
     reasoner = EulerReasoner( options.euler )
-
-    uie = UsefulInformationExtractor(options.input, options.output, reasoner)
-    uie.extract_all()
+    
+    Preprocessor.preprocess(options.input, options.output, reasoner)
