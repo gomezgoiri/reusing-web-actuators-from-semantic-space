@@ -5,9 +5,9 @@ Created on Sep 20, 2013
 '''
 
 from actuation.api.lamp_rest import RESTProvider, LampConsumerREST
-from actuation.proofs.extract_info import UsefulInformationExtractor
-from actuation.proofs.interpretation.graphs import LemmaPrecedencesGraph
-from actuation.proofs.interpretation.lemma_parser import LemmaParser
+from actuation.proofs.preprocess import UsefulInformationExtractor
+from actuation.proofs.plan import LemmaPrecedencesGraph
+from actuation.proofs.parsers.lemmas import LemmasParser
 
 class LampConsumerRESTMock(LampConsumerREST):
     
@@ -69,12 +69,16 @@ class LampConsumerRESTMock(LampConsumerREST):
         uie = UsefulInformationExtractor( plan_filepath, self.output_folder, self.reasoner )
         uie.extract_all()
         
-        self.lemma_graph = LemmaPrecedencesGraph(self.output_folder + UsefulInformationExtractor.get_output_filename("precedences"))
+        lemma_graph = LemmaPrecedencesGraph(self.output_folder + UsefulInformationExtractor.get_output_filename("precedences"))
         
-        lp = LemmaParser( self.output_folder + UsefulInformationExtractor.get_output_filename("services"),
+        lp = LemmasParser( self.output_folder + UsefulInformationExtractor.get_output_filename("services"),
                           self.output_folder + UsefulInformationExtractor.get_output_filename("bindings"),
                           self.output_folder + UsefulInformationExtractor.get_output_filename("evidences") )
-        self.lemma_graph.add_lemmas_info( lp.lemmas )
-        self.lemma_graph.create_nx_graph()
-        #self.lemma_graph.to_image( output_file = self.output_folder + "lemma_precedences.png" )
-        #self.lemma_graph.to_gml( output_file = self.output_folder + "lemma_precedences.gml" )
+        lemma_graph.add_lemmas_info( lp.lemmas )
+        lemma_graph.create_nx_graph()
+        #lemma_graph.to_image( output_file = self.output_folder + "lemma_precedences.png" )
+        #lemma_graph.to_gml( output_file = self.output_folder + "lemma_precedences.gml" )
+        return lemma_graph
+    
+    def _follow_plan(self):
+        pass

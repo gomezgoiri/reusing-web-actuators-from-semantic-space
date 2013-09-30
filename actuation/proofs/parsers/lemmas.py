@@ -14,56 +14,13 @@
 '''
 
 from optparse import OptionParser
-from rdflib import Namespace
-from actuation.proofs.interpretation.bindings_parser import BindingsParser
-from actuation.proofs.interpretation.rest_parser import RESTServicesParser
-from actuation.proofs.interpretation.evidence_templates_parser import EvidenceTemplatesParser
-
-r_ns = Namespace("http://www.w3.org/2000/10/swap/reason#")
-http_ns = Namespace("http://www.w3.org/2011/http#")
-log_ns = Namespace("http://www.w3.org/2000/10/swap/log#")
-
-
-class Lemma(object):
-    
-    def __init__(self):
-        self.rest = None
-        self._bindings = set()
-        self.evidence_templates = []
-    
-    def get_binding(self, var):
-        for binding in self.bindings:
-            if binding.variable == var:
-                return binding.bound
-        else: return None
-    
-    @property
-    def bindings(self):
-        return self._bindings
-    
-    @bindings.setter
-    def bindings(self, bindings): # to ensure that bindings is a list and therefore can be compared with other list
-        if isinstance(bindings, (list, tuple)):
-            self._bindings = set(bindings)
-        elif isinstance(bindings, set):
-            self._bindings = bindings
-        else:
-            raise Exception("It should be a list, tuple or set!")
-    
-    def equivalent_rest_calls(self, other_lemma):
-        ret = self.rest == other_lemma.rest and self.bindings == other_lemma.bindings # same bindings
-        if ret:
-            # TODO what if it is not a variable?
-            if self.rest is not None: # therefore other_lemma.rest cannot be None either
-                ret = self.get_binding( self.rest.var_body ) == other_lemma.get_binding( other_lemma.rest.var_body )
-            
-        return ret
-    
-    def __repr__(self):
-        return "l(rest: %s, bindings: %s, evidences: %s)" % (self.rest, self.bindings, self.evidence_templates)
+from actuation.proofs import Lemma
+from actuation.proofs.parsers.bindings import BindingsParser
+from actuation.proofs.parsers.rest import RESTServicesParser
+from actuation.proofs.parsers.evidence_templates import EvidenceTemplatesParser
     
 
-class LemmaParser(object):
+class LemmasParser(object):
     """
     This class parses what a lemma contains or may contain:
       * evidence template patterns
@@ -104,5 +61,5 @@ if __name__ == '__main__':
                       help="Evidences file.")
     (options, args) = parser.parse_args()
     
-    lp = LemmaParser( options.input, options.bindings )
+    lp = LemmasParser( options.input, options.bindings )
     print lp.lemmas

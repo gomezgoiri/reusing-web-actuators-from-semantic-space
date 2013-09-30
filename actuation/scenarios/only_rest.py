@@ -1,5 +1,5 @@
 from optparse import OptionParser
-from actuation.proofs.reasoner import EulerReasoner
+from actuation.proofs.reason import EulerReasoner
 from actuation.scenarios.abstract import AbstractSimulation
 from actuation.utils.files import append_slash_if_absent
 from actuation.impl.mock.lamp_rest_provider import LampProviderRESTMock

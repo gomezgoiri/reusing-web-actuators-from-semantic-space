@@ -58,6 +58,11 @@ class EulerReasoner(object):
         This method invokes Euler (EYE) in the following way:
         
         java -jar path/Euler.jar --nope [input_files] --query [goal_file] 
+        
+        
+        Or, if output_file_path is provided:
+        
+        java -jar path/Euler.jar --nope [input_files] --query [goal_file] > [output_file]
         '''
         return self._generic_query( input_files, query_file, ["--nope",], output_file_path )
     

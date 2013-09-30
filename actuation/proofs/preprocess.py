@@ -13,16 +13,18 @@
  @author: Aitor Gómez Goiri <aitor.gomez@deusto.es>
 '''
 
+import re
 from os import remove, path
 from optparse import OptionParser
-from actuation.proofs.goal_rules.query import QueryExecutor
-from actuation.proofs.processing.unblank_lemmas import unblank_lemmas
+from actuation.proofs import Namespaces
 
-'''
-This is the entry point for processing a file with proof results. 
-'''
 class UsefulInformationExtractor(object):
-        
+    '''
+    This class acts as an entry point to generate the processed files from pre-proofs.
+    
+    These temporary files are generated simply because they are easier to parse.
+    '''
+    
     EXTRACTIONS = {# identifier: (input_filename, output_filename)
                    "precedences": ("lemma_precedences.n3", "precedences.txt"),
                    "bindings": ("rest_bindings.n3", "bindings.txt"),
@@ -36,17 +38,35 @@ class UsefulInformationExtractor(object):
         self.output_folder = output_folder
         self.reasoner = reasoner
         self.path_to_goals = path.dirname(__file__) + "/goal_rules/"
+        self.tmp_file = self.output_folder + "unblanked.n3"
+    
+    # TODO Damn it, I should have used Node.skolemize(authority='http://rdlib.net/') !
+    # Otherwise BIG TODO => use FileUtils!
+    def unblank_lemmas(self):
+        fake_prefix = r"@prefix fake: <%s>." % Namespaces.FAKE
+        with open (self.input_file, "r") as input_file:
+            data = re.sub('_:lemma(?P<num>\d+)', 'fake:lemma\g<num>', input_file.read())
+            # Or...
+            # g = Graph()
+            # g.parse( StringIO( fake_prefix + "\n" + data ), format="n3" )
+            # print g.serialize(format="n3")
+            with open (self.tmp_file, "w") as output_file:
+                output_file.write( fake_prefix + "\n" + data)
+    
+    def _execute_and_save(self, query_file, output_file_path):
+        self.reasoner.query( self.input_file, query_file, output_file_path )
+    
+    def _execute_and_show(self, query_file):
+        print self.reasoner.query( self.input_file, query_file )
     
     def start(self):
-        self.tmp_file = self.output_folder + "unblanked.n3"
-        unblank_lemmas( self.input_file, self.tmp_file )
-        self.default_qe = QueryExecutor( self.tmp_file, self.reasoner )
+        self.unblank_lemmas()
         
     def stop(self):
         remove( self.tmp_file ) # not really necessary since the folder may be destroyed afterwards
     
     @staticmethod
-    def get_input_filename(identifier):
+    def _get_input_filename(identifier):
         return UsefulInformationExtractor.EXTRACTIONS[identifier][0]
     
     @staticmethod
@@ -54,9 +74,9 @@ class UsefulInformationExtractor(object):
         return UsefulInformationExtractor.EXTRACTIONS[identifier][1]
     
     def extract_item(self, identifier):
-        input_name = UsefulInformationExtractor.get_input_filename(identifier)
+        input_name = UsefulInformationExtractor._get_input_filename(identifier)
         output_name = UsefulInformationExtractor.get_output_filename(identifier)
-        self.default_qe.execute_and_save( self.path_to_goals + input_name,
+        self._execute_and_save( self.path_to_goals + input_name,
                                           self.output_folder + output_name )
     
     def extract_all(self):
@@ -71,6 +91,7 @@ class UsefulInformationExtractor(object):
         self.stop()
 
 
+
 if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-i", "--input", dest="input",
@@ -81,7 +102,7 @@ if __name__ == '__main__':
                       help = "Path to Euler.jar")
     (options, args) = parser.parse_args()
 
-    from actuation.euler.reasoner import EulerReasoner
+    from actuation.proofs.reason import EulerReasoner
     reasoner = EulerReasoner( options.euler )
 
     uie = UsefulInformationExtractor(options.input, options.output, reasoner)
