@@ -14,9 +14,10 @@
 '''
 
 import re
+from StringIO import StringIO
 from os import path
 from optparse import OptionParser
-from rdflib import Graph, RDF
+from rdflib import Graph
 from actuation.proofs import Namespaces
 
 
@@ -68,7 +69,7 @@ class Preprocessor(object):
     
     @staticmethod
     # http://answers.semanticweb.com/questions/8336/what-is-skolemization
-    def _skolemize_lemmas_and_write(input_file, output_folder):
+    def _skolemize_lemmas_and_write_less_optimum(input_file, output_folder):
         filename = output_folder + "skolemized_plan.n3"
         g = Graph()
         g.parse( input_file, format="n3" )
@@ -84,16 +85,20 @@ class Preprocessor(object):
         
         return filename
     
-    # Or much more straight... :-S
-    #def _skolemize_lemmas_and_write2(self):
-    #    fake_prefix = r"@prefix fake: <%s>." % Namespaces.FAKE
-    #    with open (self.input_file, "r") as input_file:
-    #        data = re.sub('_:lemma(?P<num>\d+)', 'fake:lemma\g<num>', input_file.read())
-    #        g = Graph()
-    #        g.parse( StringIO( fake_prefix + "\n" + data ), format="n3" )
-    #        print g.serialize(format="n3")
-    #        with open (self.tmp_file, "w") as output_file:
-    #            output_file.write( fake_prefix + "\n" + data)
+    @staticmethod
+    # Or much more straight and fast alternative... :-S
+    def _skolemize_lemmas_and_write(input_file, output_folder):
+        filename = output_folder + "partially_skolemized_plan.n3"
+        
+        fake_prefix = r"@prefix fake: <%s>." % Namespaces.FAKE
+        with open (input_file, "r") as input_file:
+            data = re.sub('_:lemma(?P<num>\d+)', 'fake:lemma\g<num>', input_file.read())
+            g = Graph()
+            g.parse( StringIO( fake_prefix + "\n" + data ), format="n3" )
+            with open (filename, "w") as output_file:
+                output_file.write( fake_prefix + "\n" + data)
+        
+        return filename
     
     @staticmethod
     def preprocess(input_file, output_folder, reasoner):
