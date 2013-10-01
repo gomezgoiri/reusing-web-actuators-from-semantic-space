@@ -27,6 +27,8 @@
   # Take a look at: http://www.w3.org/DesignIssues/Reify.html
   ?lemma r:binding [ 
   	  r:var ?var ;
-	  r:bound ?bound
+  	  r:boundType ?pbound ;
+  	  r:bound ?bound ;
+  	  r:bound2 ?blank_bound
   ]
 }.

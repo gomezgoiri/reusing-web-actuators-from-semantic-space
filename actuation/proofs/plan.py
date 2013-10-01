@@ -37,6 +37,9 @@ class LemmaPrecedencesGraph(object):
         self.rdf_graph = Graph()
         self.rdf_graph.parse(file_path, format="n3")
         self._create_nx_graph( lemmas_info )
+        
+        # TODO remove from the methods params
+        self._lemmas_info = lemmas_info
     
     def _is_repeated(self, added_children_uris, new_child_node_info, lemma_info):
         for added_child_uri in added_children_uris:
@@ -113,7 +116,11 @@ class LemmaPrecedencesGraph(object):
         plt.savefig(output_file)
 
     def get_shortest_path(self):
-        return nx.shortest_path(self.graph, source="source", target="target")
+        list_with_lemmas = []
+        for node_name in nx.shortest_path(self.graph, source="source", target="target"):
+            list_with_lemmas.append( self._lemmas_info.get_lemma( node_name ) )
+            print node_name
+        return list_with_lemmas
     
     def get_all_paths(self):
         return nx.all_simple_paths(self.graph, source="source", target="target")

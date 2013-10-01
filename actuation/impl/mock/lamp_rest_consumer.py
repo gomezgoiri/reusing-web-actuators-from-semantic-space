@@ -57,7 +57,8 @@ class LampConsumerRESTMock(LampConsumerREST):
     
     def achieve_goal(self, query_goal_path):
         plan_filepath = self._create_plan(query_goal_path, self.descriptions.union( self.base_knowledge ) )
-        self._process_plan( plan_filepath )
+        lgraph = self._process_plan( plan_filepath )
+        self._follow_plan( lgraph )
         
     def _create_plan(self, query_goal_path, rule_paths):
         output_file_path = self.reasoner.query_proofs( rule_paths ,
@@ -74,9 +75,10 @@ class LampConsumerRESTMock(LampConsumerREST):
         lemma_graph = LemmaPrecedencesGraph( self.output_folder + Preprocessor.get_output_filename("precedences"),
                                              lemmas )
         
-        lemma_graph.to_image( output_file = self.output_folder + "lemma_precedences.png" )
+        #lemma_graph.to_image( output_file = self.output_folder + "lemma_precedences.png" )
         #lemma_graph.to_gml( output_file = self.output_folder + "lemma_precedences.gml" )
         return lemma_graph
     
-    def _follow_plan(self):
-        pass
+    def _follow_plan(self, lgraph):
+        for n in lgraph.get_shortest_path():
+            print n

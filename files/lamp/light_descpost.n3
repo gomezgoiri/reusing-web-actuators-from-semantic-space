@@ -26,7 +26,7 @@
 {
   _:request http:methodName "POST";
             http:requestURI "lamp/actuators/light" ;
-            http:body ?obsv ;
+            http:body ?desired_value ;
             http:resp [ http:body ?lightObs ].
   
   actuators:light ssn:madeObservation ?lightObs .

@@ -14,6 +14,7 @@
 '''
 
 from rdflib import URIRef, Namespace
+from rdflib.term import Variable
 
 
 '''
@@ -34,6 +35,8 @@ class Namespaces(object):
     LOG = Namespace("http://www.w3.org/2000/10/swap/log#")
     REASON = Namespace("http://www.w3.org/2000/10/swap/reason#")
     VAR = Namespace("http://localhost/var#")
+    N3 = Namespace("http://www.w3.org/2004/06/rei#")
+    E = Namespace("http://eulersharp.sourceforge.net/2003/03swap/log-rules#")
     # Why did I use a new namespace? // In this project is deprecated
     # So EYE cannot know that I'm talking about a variable which will be bounded with TSC knowledge.
     # Otherwise, EYE will treat it differently, so with my queries I will get a blank node.
@@ -73,12 +76,12 @@ class Lemmas(object):
         return None
     
     def __repr__(self):
-        s = "( "
+        s = "(\n"
         for l in self._lemmas.iterkeys():
-            if s is "( ":
+            if s is "(\n":
                 s += l
             else:
-                s += ", " + l
+                s += ", \n" + l
         s += " )" 
         return s
 
@@ -124,8 +127,78 @@ class Lemma(object):
     def is_rest_call(self):
         return self.rest is not None
     
+    def __get_indented_list(self, ilist, indentations):
+        ret = ""
+        for el in ilist:
+            ret += "\n"
+            for _ in range(indentations):
+                ret += "\t"
+            ret += str(el)
+        return ret
+    
     def __repr__(self):
-        return "l(rest: %s, bindings: %s, evidences: %s)" % (self.rest, self.bindings, self.evidence_templates)
+        b = self.__get_indented_list( self.bindings, 2 )
+        e = self.__get_indented_list( self.evidence_templates, 2 )
+        return "l(\n\trest:\n\t\t %s,\n\tbindings: %s,\n\tevidences: %s\n)" % (self.rest, b, e)
+
+
+
+class RESTCall(object):
+    """
+    Represents the REST HTTP call that a given lemma implies.
+    
+    A call is composed by the HTTP method, a request URI and some variables for the request body. 
+    """
+    
+    def __init__(self, method, request_uri, var_body):
+        self.method = method
+        self.request_uri = request_uri
+        # TODO refactor
+        # In this case var_body is already a Variable object, so the creation method could be avoided!
+        self.var_body = VariableUtil.create(var_body)
+    
+    def __repr__(self):
+        return "r(m: %s, ru: %s, body: %r)" % (self.method, self.request_uri, self.var_body)
+    
+    def __eq__(self, other):
+        return (self.method == other.method) and (self.request_uri == other.request_uri)
+
+
+
+class Binding(object):
+    """
+    This class represents a binding between a variable and a value.
+    """
+        
+    def __init__(self, variable, bound):
+        self.variable = VariableUtil.create( variable )
+        self.bound = bound 
+    
+    @property
+    def bound(self):
+        return self._bound
+    
+    @bound.setter
+    def bound(self, bound):
+        self._bound = self._get_proper_bound( bound ) # should be URIRef?
+    
+    def _get_proper_bound(self, bound):
+        ret = VariableUtil.create(bound)
+        if ret is None:
+            if bound.startswith("http://"):
+                ret = URIRef( bound )
+            else: # TODO literal
+                return bound
+        return ret
+    
+    def __eq__(self, other_binding):
+        return self.variable == other_binding.variable and self.bound == other_binding.bound
+
+    def __hash__(self):
+        return hash(self.variable) + hash(self.bound)
+    
+    def __repr__(self):
+        return "b(var: %r, bound: %s)" % (self.variable, self.bound)
 
 
 
@@ -142,7 +215,7 @@ class Template(object):
         self.object = self._substitute_with_variable_if_possible( triple[2] )
     
     def _substitute_with_variable_if_possible(self, element):
-        var = Variable.create( element )
+        var = VariableUtil.create( element )
         return var if var is not None else element
     
     def _substitute_with_None_if_variable(self, element):
@@ -168,101 +241,23 @@ class Template(object):
 
 
 
-class RESTCall(object):
-    """
-    Represents the REST HTTP call that a given lemma implies.
-    
-    A call is composed by the HTTP method, a request URI and some variables for the request body. 
-    """
-    
-    def __init__(self, method, request_uri, var_body):
-        self.method = method
-        self.request_uri = request_uri
-        self.var_body = Variable.create(var_body)
-    
-    def __repr__(self):
-        return "r(m: %s, ru: %s, body: %s)" % (self.method, self.request_uri, self.var_body)
-    
-    def __eq__(self, other):
-        return (self.method == other.method) and (self.request_uri == other.request_uri)
-
-
-
-class Binding(object):
-    """
-    This class represents a binding between a variable and a value.
-    """
-        
-    def __init__(self, variable, bound):
-        self.variable = Variable.create( variable )
-        self.bound = bound 
-    
-    @property
-    def bound(self):
-        return self._bound
-    
-    @bound.setter
-    def bound(self, bound):
-        self._bound = self._get_proper_bound( bound ) # should be URIRef?
-    
-    def _get_proper_bound(self, bound):
-        ret = Variable.create(bound)
-        if ret is None:
-            if bound.startswith("http://"):
-                ret = URIRef( bound )
-            else: # TODO literal
-                return bound
-        return ret
-    
-    def __eq__(self, other_binding):
-        return self.variable == other_binding.variable and self.bound == other_binding.bound
-
-    def __hash__(self):
-        return hash(self.variable) + hash(self.bound)
-    
-    def __repr__(self):
-        return "b(var: %s, bound: %s)" % (self.variable, self.bound)
-
-
-class Variable(object):
+class VariableUtil(object):
     """Class which represents ?var in a expression"""
-    
-    def __init__(self, name):
-        self.name = name
-    
-    def urize(self): # could it be considered as a reification?
-        return Namespaces.VAR[self.name]
-    
-    def fake_urize(self):
-        return Namespaces.FAKE[self.name]
     
     @staticmethod
     def create(possible_var):
         """
-        If 'binding_name' is "http://localhost/var#x0" or ?x0, simply takes x0.
+        If 'possible_var' is "http://localhost/var#x0" or ?x0, simply takes x0.
         
         @param possible_var: can be either a 'string' or a 'rdflib.URIRef'  
         """
+        if isinstance(possible_var, Variable): # TODO then avoid calling to this factory! :-)
+            return possible_var
+        
         prefs = (Namespaces.VAR, Namespaces.FAKE, "?")
         for pref in prefs:
             if possible_var.startswith(pref): # startswith() works with URIRefs and Namespaces
                 # if possible_var is a URIRef, [:] converts it to string
                 return Variable( possible_var[ len(pref):] )
-        else: return None
-    
-    def n3(self):
-        return self.__repr__()
-    
-    def __str__(self):
-        return self.__repr__()
-    
-    def __repr__(self):
-        return "?%s" % self.name
-    
-    def __eq__(self, other):
-        if isinstance(other, Variable):
-            return self.name == other.name
-        return False # If "other" belongs to a different class of is "None"
-    
-    def __hash__(self):
-        return hash( self.name )
+        else:
+            return None

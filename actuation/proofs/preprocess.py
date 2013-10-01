@@ -86,7 +86,7 @@ class Preprocessor(object):
         return filename
     
     @staticmethod
-    # Or much more straight and fast alternative... :-S
+    # Or much more straightforward and fast alternative... :-S
     def _skolemize_lemmas_and_write(input_file, output_folder):
         filename = output_folder + "partially_skolemized_plan.n3"
         
@@ -111,7 +111,7 @@ class Preprocessor(object):
         
         for input_filename, output_filename in Preprocessor.EXTRACTIONS.itervalues():
             # extract item
-            print "Processing %s > %s" % (path_to_goals + input_filename, output_folder + output_filename)
+            #print "Processing %s > %s" % (path_to_goals + input_filename, output_folder + output_filename)
             reasoner.query( skolemized_file,
                             path_to_goals + input_filename,
                             output_folder + output_filename )

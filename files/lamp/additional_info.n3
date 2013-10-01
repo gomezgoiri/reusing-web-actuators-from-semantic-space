@@ -13,6 +13,6 @@
 
 
 # Description of the preference
-_:obsv a ssn:ObservationValue, frap:Preference ;
+:obsv a ssn:ObservationValue, frap:Preference ;
       dul:isClassifiedBy  ucum:lux ;
       dul:hasDataValue 19 . 
