@@ -41,6 +41,48 @@ class Namespaces(object):
     FAKE = Namespace("http://fake.is/var#")
 
 
+class Lemmas(object):
+    """
+    This class is a collection of Lemma objects with some utility methods.
+    
+    Represents the result file of a Euler reasoning in memory.
+    """
+    
+    def __init__(self):
+        self._lemmas = {}
+    
+    def _get_and_create_if_not_exists(self, lemma_name):
+        s_lname = str( lemma_name )
+        if s_lname not in self._lemmas:
+            self._lemmas[s_lname] = Lemma()
+        return self._lemmas[s_lname]
+            
+    def add_bindings(self, lemma, bindings):
+        self._get_and_create_if_not_exists( lemma ).bindings = bindings
+    
+    def add_rest_call(self, lemma, rest_call):
+        self._get_and_create_if_not_exists( lemma ).rest = rest_call
+    
+    def add_evidence_templates(self, lemma, templates):
+        self._get_and_create_if_not_exists( lemma ).evidence_templates = templates
+    
+    def get_lemma(self, lemma_name):
+        s_lname = str( lemma_name )
+        if s_lname in self._lemmas:
+            return self._lemmas[s_lname]
+        return None
+    
+    def __repr__(self):
+        s = "( "
+        for l in self._lemmas.iterkeys():
+            if s is "( ":
+                s += l
+            else:
+                s += ", " + l
+        s += " )" 
+        return s
+
+
 class Lemma(object):
     """
     A lemma has some evidence templates (premises), a rest call (consequence) and some values to make that call (bindings). 
@@ -78,6 +120,9 @@ class Lemma(object):
                 ret = self.get_binding( self.rest.var_body ) == other_lemma.get_binding( other_lemma.rest.var_body )
             
         return ret
+    
+    def is_rest_call(self):
+        return self.rest is not None
     
     def __repr__(self):
         return "l(rest: %s, bindings: %s, evidences: %s)" % (self.rest, self.bindings, self.evidence_templates)

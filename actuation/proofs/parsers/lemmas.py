@@ -14,11 +14,12 @@
 '''
 
 from optparse import OptionParser
-from actuation.proofs import Lemma
+from actuation.proofs import Lemmas
 from actuation.proofs.parsers.bindings import BindingsParser
 from actuation.proofs.parsers.rest import RESTServicesParser
 from actuation.proofs.parsers.evidence_templates import EvidenceTemplatesParser
     
+# This can be interesting: https://github.com/RDFLib/rdflib/blob/master/docs/persisting_n3_terms.rst
 
 class LemmasParser(object):
     """
@@ -28,32 +29,28 @@ class LemmasParser(object):
       * rest services
     """
     
-    def __init__(self, rest_file_path, bindings_path, evidences_path):
-        self.lemmas = {}
+    @staticmethod
+    def parse_file( rest_file_path, bindings_path, evidences_path):
+        lemmas = Lemmas()
         
         bp = BindingsParser( bindings_path ) 
         for lemma, bindings in bp.bindings_by_lemma.iteritems():
-            self._init_lemma_if_needed(lemma)
-            self.lemmas[lemma].bindings = bindings
-        
+            lemmas.add_bindings( lemma, bindings )
+            
         rp = RESTServicesParser( rest_file_path )
         for lemma, rest in rp.calls.iteritems():
-            self._init_lemma_if_needed(lemma)
-            self.lemmas[lemma].rest = rest
+            lemmas.add_rest_call( lemma, rest )
             
         etp = EvidenceTemplatesParser( evidences_path )
         for lemma, templates in etp.templates_by_lemma.iteritems():
-            self._init_lemma_if_needed(lemma)
-            self.lemmas[lemma].evidence_templates = templates
-    
-    def _init_lemma_if_needed(self, lemma):
-        if lemma not in self.lemmas:
-            self.lemmas[lemma] = Lemma()
+            lemmas.add_evidence_templates( lemma, templates )
+        
+        return lemmas
 
 
 if __name__ == '__main__':
     parser = OptionParser()
-    parser.add_option("-i", "--rest_input", dest="input", default="../../../files/services.txt",
+    parser.add_option("-r", "--rest_input", dest="rest", default="../../../files/services.txt",
                       help="REST services file.")
     parser.add_option("-b", "--bindings", dest="bindings", default="../../../files/bindings.txt",
                       help="Bindings file.")
@@ -61,5 +58,4 @@ if __name__ == '__main__':
                       help="Evidences file.")
     (options, args) = parser.parse_args()
     
-    lp = LemmasParser( options.input, options.bindings )
-    print lp.lemmas
+    print LemmasParser.parse_file( options.rest, options.bindings, options.evidences )

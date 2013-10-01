@@ -67,15 +67,14 @@ class LampConsumerRESTMock(LampConsumerREST):
 
     def _process_plan(self, plan_filepath):
         Preprocessor.preprocess( plan_filepath, self.output_folder, self.reasoner )
+        lemmas = LemmasParser.parse_file( self.output_folder + Preprocessor.get_output_filename("services"),
+                                          self.output_folder + Preprocessor.get_output_filename("bindings"),
+                                          self.output_folder + Preprocessor.get_output_filename("evidences") )
         
-        lemma_graph = LemmaPrecedencesGraph(self.output_folder + Preprocessor.get_output_filename("precedences"))
+        lemma_graph = LemmaPrecedencesGraph( self.output_folder + Preprocessor.get_output_filename("precedences"),
+                                             lemmas )
         
-        lp = LemmasParser( self.output_folder + Preprocessor.get_output_filename("services"),
-                          self.output_folder + Preprocessor.get_output_filename("bindings"),
-                          self.output_folder + Preprocessor.get_output_filename("evidences") )
-        lemma_graph.add_lemmas_info( lp.lemmas )
-        lemma_graph.create_nx_graph()
-        #lemma_graph.to_image( output_file = self.output_folder + "lemma_precedences.png" )
+        lemma_graph.to_image( output_file = self.output_folder + "lemma_precedences.png" )
         #lemma_graph.to_gml( output_file = self.output_folder + "lemma_precedences.gml" )
         return lemma_graph
     
