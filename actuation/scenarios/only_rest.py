@@ -32,7 +32,7 @@ class OnlyRESTDevicesSimulator(AbstractSimulation):
     def configure(self):
         self.lp = LampProviderRESTMock( self.input_folder, self.output_folder )
         self.lc = LampConsumerRESTMock( self.input_folder, self.output_folder, self.reasoner)
-        self.lc.discover( self.lp )
+        self.lc.discover( self.lp, "example.org")
         #print self.lp.get_resource("/lamp/light").get()
     
     def execute(self):

@@ -107,6 +107,7 @@ class LightResource(Resource):
     
     def post(self, post_body):
         # parse
+        # TODO
         pass
     
     # GET /measure/XX not particular of a "measure" instance --> we share it ALSO in the parent

@@ -4,6 +4,7 @@ Created on Sep 20, 2013
 @author: tulvur
 '''
 
+import re
 from actuation.api.lamp_rest import RESTProvider, LampConsumerREST
 from actuation.proofs.preprocess import Preprocessor
 from actuation.proofs.plan import LemmaPrecedencesGraph
@@ -17,16 +18,34 @@ class LampConsumerRESTMock(LampConsumerREST):
         self.output_folder = output_folder
         self.reasoner = reasoner
         
-        self._nodes = []
+        self._nodes = {}
         self.descriptions = set()
         self.base_knowledge = set()
     
     # In the mock implementation, the resources are not retrieved through HTTP
-    def discover(self, node):
-        self._nodes.append( node )  
+    def discover(self, node, address):
+        self._nodes[address] = node
+    
+    def get_node(self, url_address):
+        """
+        @param url_address: An http address to a certain resource.
+                            E.g. "http://node.deusto.es/lamp/light"
+        @return: If no node is found for this address, it returns None.
+                Otherwise, it returns a tuple containing the node and the rest of the address.
+                E.g. providing "node.deusto.es" corresponds to nodeN: (nodeN, "lamp/light")
+                
+        """
+        pat = re.compile("http://(?P<address>[\.\w]+)(?P<remaining>.*)")
+        match = pat.search( url_address )
+        if match:
+            addr = match.group('address')
+            if addr in self._nodes:
+                remaining = match.group('remaining')
+                return (self._nodes[ addr ], remaining)
+        # else returns None
     
     def _obtain_resource_descriptions(self):
-        for node in self._nodes:
+        for node in self._nodes.itervalues():
             if isinstance(node, RESTProvider):
                 # In the real implementation the resources must be discovered using HTTP
                 for resource in node.get_all_resources():
@@ -39,7 +58,7 @@ class LampConsumerRESTMock(LampConsumerREST):
      
     def _obtain_base_knowledge(self):
         '''Crawling to obtain base knowledge (done by an spider, autonomous agent)'''
-        for node in self._nodes:
+        for node in self._nodes.itervalues():
             if isinstance(node, RESTProvider):
                 # In the real implementation the resources must be discovered using HTTP
                 for resource in node.get_all_resources():
@@ -79,6 +98,26 @@ class LampConsumerRESTMock(LampConsumerREST):
         #lemma_graph.to_gml( output_file = self.output_folder + "lemma_precedences.gml" )
         return lemma_graph
     
+    def __make_call(self, rest_call):
+        nret = self.get_node( rest_call.request_uri )
+        if nret:
+            node, remaining_path = nret
+            rsc = node.get_resource( remaining_path )
+            
+            if rsc is None:
+                print "Resource '%s' not found in node." % (remaining_path)
+            if rest_call.method == "POST":
+                return rsc.post( rest_call.body )
+            elif rest_call.method == "GET":
+                return rsc.get()
+            else:
+                raise Exception( "TODO, HTTP verb: %s" % (rest_call.method) )
+        else:
+            print "Node not found"
+        
+    
     def _follow_plan(self, lgraph):
         for n in lgraph.get_shortest_path():
-            print n
+            if n.is_rest_call():
+                self.__make_call( n.rest )
+                print n

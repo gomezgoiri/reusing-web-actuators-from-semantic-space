@@ -118,8 +118,8 @@ class LemmaPrecedencesGraph(object):
     def get_shortest_path(self):
         list_with_lemmas = []
         for node_name in nx.shortest_path(self.graph, source="source", target="target"):
-            list_with_lemmas.append( self._lemmas_info.get_lemma( node_name ) )
-            print node_name
+            if node_name not in ("source", "target"):
+                list_with_lemmas.append( self._lemmas_info.get_lemma( node_name ) )
         return list_with_lemmas
     
     def get_all_paths(self):

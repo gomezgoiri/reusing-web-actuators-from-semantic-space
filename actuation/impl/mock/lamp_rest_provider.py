@@ -15,7 +15,7 @@ class LampProviderRESTMock(RESTProvider):
         self.resources['lamp'] = LampResource( input_folder )
         light_resource = LightResource( input_folder,
                                         output_folder )
-        self.resources['lamp'].add_sub_resource("light", light_resource)
+        self.resources['lamp'].add_sub_resource("actuators/light", light_resource)
     
     def start(self):
         pass
