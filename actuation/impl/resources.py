@@ -90,6 +90,7 @@ class LightResource(Resource):
     def _add_measure(self, light_val):
         measure_rsc = self.measure_factory.create( light_val )
         self.add_sub_resource( str( measure_rsc.id ), measure_rsc )
+        return measure_rsc
     
     def _get_measures_ids(self):
         return self.get_sub_resource_paths()
@@ -106,9 +107,9 @@ class LightResource(Resource):
         return self.filepath
     
     def post(self, post_body):
-        # parse
-        # TODO
-        pass
+        # post_body is a Literal
+        measure_rsc = self._add_measure( post_body.value )
+        return measure_rsc.get()
     
     # GET /measure/XX not particular of a "measure" instance --> we share it ALSO in the parent
     def options(self):

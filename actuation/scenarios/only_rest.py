@@ -43,7 +43,9 @@ class OnlyRESTDevicesSimulator(AbstractSimulation):
         self.lc.achieve_goal( self.input_folder + "light_goal.n3" )
     
     def check(self):
-        pass
+        rsc = self.lp.get_resource("/lamp/actuators/light/2/")
+        # TODO check that the value of this resource is the desired one (manually checked) 
+        return rsc is not None
 
 
 if __name__ == '__main__':

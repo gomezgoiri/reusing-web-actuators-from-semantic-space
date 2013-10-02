@@ -34,8 +34,11 @@ class AbstractSimulation(object):
         
         for node in self.nodes.itervalues():
             node.stop()
-            
-        self.check()
+        
+        if self.check():
+            print "The scenario behaved as expected."
+        else:
+            print "The scenario didn't run as expected."
     
     @abstractmethod
     def configure(self):

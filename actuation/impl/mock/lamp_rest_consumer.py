@@ -98,20 +98,23 @@ class LampConsumerRESTMock(LampConsumerREST):
         #lemma_graph.to_gml( output_file = self.output_folder + "lemma_precedences.gml" )
         return lemma_graph
     
-    def __make_call(self, rest_call):
-        nret = self.get_node( rest_call.request_uri )
+    def __make_call(self, lemma):
+        nret = self.get_node( lemma.rest.request_uri )
         if nret:
             node, remaining_path = nret
             rsc = node.get_resource( remaining_path )
             
             if rsc is None:
                 print "Resource '%s' not found in node." % (remaining_path)
-            if rest_call.method == "POST":
-                return rsc.post( rest_call.body )
-            elif rest_call.method == "GET":
-                return rsc.get()
             else:
-                raise Exception( "TODO, HTTP verb: %s" % (rest_call.method) )
+                met = str(lemma.rest.method)
+                if met == "POST":
+                    body = lemma.get_binding( lemma.rest.var_body )
+                    return rsc.post( body )
+                elif met == "GET":
+                    return rsc.get()
+                else:
+                    raise Exception( "TODO, HTTP verb: %s" % (lemma.rest.method) )
         else:
             print "Node not found"
         
@@ -119,5 +122,5 @@ class LampConsumerRESTMock(LampConsumerREST):
     def _follow_plan(self, lgraph):
         for n in lgraph.get_shortest_path():
             if n.is_rest_call():
-                self.__make_call( n.rest )
-                print n
+                print self.__make_call( n )
+                #print n
