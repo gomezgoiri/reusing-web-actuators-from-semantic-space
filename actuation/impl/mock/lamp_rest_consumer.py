@@ -99,6 +99,7 @@ class LampConsumerRESTMock(LampConsumerREST):
         return lemma_graph
     
     def __make_call(self, lemma):
+        # TODO the output of a call should be parsed: it may be the input of another one
         nret = self.get_node( lemma.rest.request_uri )
         if nret:
             node, remaining_path = nret
@@ -121,6 +122,9 @@ class LampConsumerRESTMock(LampConsumerREST):
     
     def _follow_plan(self, lgraph):
         for n in lgraph.get_shortest_path():
+            #print n
             if n.is_rest_call():
-                print self.__make_call( n )
-                #print n
+                # deliberated ignore of the return
+                # in this project we just check a simple path composed by a unique rest call 
+                self.__make_call( n )
+                

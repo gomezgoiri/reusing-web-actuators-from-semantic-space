@@ -4,14 +4,29 @@ Created on Sep 19, 2013
 @author: tulvur
 '''
 
-class MyClass(object):
-    '''
-    classdocs
-    '''
+from abc import ABCMeta, abstractmethod
+
+class Space(object):
+    
+    __metaclass__ = ABCMeta
+    
+    @abstractmethod
+    def write(self, graph):
+        pass
+    
+    @abstractmethod
+    def read(self, template):
+        pass
+    
+    @abstractmethod
+    def subscribe(self, template, callback):
+        pass
 
 
-    def __init__(selfparams):
-        '''
-        Constructor
-        '''
-        
+class AbstractCallback(object):
+    
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def call(self):
+        pass
