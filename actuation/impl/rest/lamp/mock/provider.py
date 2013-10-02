@@ -4,8 +4,8 @@ Created on Sep 19, 2013
 @author: tulvur
 '''
 
-from actuation.api.lamp_rest import RESTProvider
-from actuation.impl.resources import LampResource, LightResource
+from actuation.api.rest import RESTProvider
+from actuation.impl.rest.lamp.resources import LampResource, LightResource
 
 
 class LampProviderRESTMock(RESTProvider):

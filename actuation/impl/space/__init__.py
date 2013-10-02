@@ -4,9 +4,8 @@ Created on Oct 2, 2013
 @author: tulvur
 '''
 
-from actuation.api.lamp_ts import Space
+from actuation.api.space import Space
 from actuation.impl.otsopy.dataaccess.store import DataAccess
-
 
 
 class CoordinationSpace(Space):

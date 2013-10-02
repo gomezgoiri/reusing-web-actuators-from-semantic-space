@@ -6,8 +6,8 @@ Created on Sep 23, 2013
 import unittest
 from random import shuffle
 from mock import MagicMock
-from actuation.api.lamp_rest import RESTProvider
-from actuation.impl.mock.lamp_rest_consumer import LampConsumerRESTMock
+from actuation.api.rest import RESTProvider
+from actuation.impl.rest.lamp.mock.consumer import LampConsumerRESTMock
 
 
 class LampConsumerRESTMockTest(unittest.TestCase):

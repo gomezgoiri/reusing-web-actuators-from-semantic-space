@@ -2,8 +2,8 @@ from optparse import OptionParser
 from actuation.proofs.reason import EulerReasoner
 from actuation.scenarios.abstract import AbstractSimulation
 from actuation.utils.files import append_slash_if_absent
-from actuation.impl.mock.lamp_rest_provider import LampProviderRESTMock
-from actuation.impl.mock.lamp_rest_consumer import LampConsumerRESTMock
+from actuation.impl.rest.lamp.mock.provider import LampProviderRESTMock
+from actuation.impl.rest.lamp.mock.consumer import LampConsumerRESTMock
 
 
 class OnlyRESTDevicesSimulator(AbstractSimulation):

@@ -5,12 +5,13 @@ Created on Sep 20, 2013
 '''
 
 import re
-from actuation.api.lamp_rest import RESTProvider, LampConsumerREST
+from actuation.api import Node
+from actuation.api.rest import RESTProvider
 from actuation.proofs.preprocess import Preprocessor
 from actuation.proofs.plan import LemmaPrecedencesGraph
 from actuation.proofs.parsers.lemmas import LemmasParser
 
-class LampConsumerRESTMock(LampConsumerREST):
+class LampConsumerRESTMock(Node):
     
     def __init__(self, input_folder, output_folder, reasoner):
         super(LampConsumerRESTMock,self).__init__()

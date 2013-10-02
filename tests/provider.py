@@ -4,9 +4,8 @@ Created on Sep 23, 2013
 @author: tulvur
 '''
 import unittest
-from mock import MagicMock
-from actuation.api.lamp_rest import RESTProvider
-from actuation.impl.resources import Resource
+from actuation.api.rest import RESTProvider
+from actuation.impl.rest.lamp.resources import Resource
 
 # Tests RESTProvider and Resource
 class RESTProviderTest(unittest.TestCase):
