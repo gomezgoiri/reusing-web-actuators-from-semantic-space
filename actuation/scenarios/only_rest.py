@@ -1,7 +1,5 @@
-from optparse import OptionParser
 from actuation.proofs.reason import EulerReasoner
-from actuation.scenarios.abstract import AbstractSimulation
-from actuation.utils.files import append_slash_if_absent
+from actuation.scenarios.abstract import AbstractSimulation, main
 from actuation.impl.rest.lamp.mock.provider import LampProviderRESTMock
 from actuation.impl.rest.lamp.mock.consumer import LampConsumerRESTMock
 
@@ -49,22 +47,4 @@ class OnlyRESTDevicesSimulator(AbstractSimulation):
 
 
 if __name__ == '__main__':
-    parser = OptionParser()
-    parser.add_option("-i", "--input", dest="input",
-                      help="Base directory where all the files used in the simulation are stored.")
-    parser.add_option("-o", "--output", dest="output", default="/tmp",
-                      help="Output folder where the processed results will be written.")
-    parser.add_option("-e", "--euler", dest = "euler", default='../../lib',
-                      help = "Path to Euler.jar")
-    parser.add_option("-c", "--clean", dest = "clean", default="True",
-                      help = "Specifies whether the output directory should be clean after the execution.")
-    (options, args) = parser.parse_args()
-    
-    sim = OnlyRESTDevicesSimulator( append_slash_if_absent( options.input ),
-                                    append_slash_if_absent( options.output ),
-                                    append_slash_if_absent( options.euler ) )
-    
-    sim.run()
-    
-    if options.clean.lower() == "true":
-        sim.clean()
+    main( OnlyRESTDevicesSimulator )

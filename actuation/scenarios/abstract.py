@@ -4,10 +4,11 @@ Created on Sep 19, 2013
 @author: tulvur
 '''
 
-from abc import ABCMeta, abstractmethod
 from tempfile import mkdtemp
 from shutil import rmtree
-
+from optparse import OptionParser
+from abc import ABCMeta, abstractmethod
+from actuation.utils.files import append_slash_if_absent
 
 class AbstractSimulation(object):
     
@@ -54,3 +55,27 @@ class AbstractSimulation(object):
     
     def clean(self):
         rmtree( self.output_folder )
+
+
+def main( simulation_subclass ):
+    #eval("from actuation.scenarios.only_rest import " + simulation_class_name)
+    parser = OptionParser()
+    parser.add_option("-i", "--input", dest="input",
+                      help="Base directory where all the files used in the simulation are stored.")
+    parser.add_option("-o", "--output", dest="output", default="/tmp",
+                      help="Output folder where the processed results will be written.")
+    parser.add_option("-e", "--euler", dest = "euler", default='../../lib',
+                      help = "Path to Euler.jar")
+    parser.add_option("-c", "--clean", dest = "clean", default="True",
+                      help = "Specifies whether the output directory should be clean after the execution.")
+    (options, args) = parser.parse_args()
+    
+    # with reflection
+    sim = simulation_subclass( append_slash_if_absent( options.input ),
+                            append_slash_if_absent( options.output ),
+                            append_slash_if_absent( options.euler ) )
+    
+    sim.run()
+    
+    if options.clean.lower() == "true":
+        sim.clean()
