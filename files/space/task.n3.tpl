@@ -8,4 +8,4 @@
 # Description of the preference
 :obsv a ssn:ObservationValue, frap:Preference ;
       dul:isClassifiedBy  ucum:lux ;
-      dul:hasDataValue 19 . 
+      dul:hasDataValue {{value}} .

@@ -58,22 +58,21 @@ class AbstractSimulation(object):
 
 
 def main( simulation_subclass ):
-    #eval("from actuation.scenarios.only_rest import " + simulation_class_name)
     parser = OptionParser()
     parser.add_option("-i", "--input", dest="input",
                       help="Base directory where all the files used in the simulation are stored.")
     parser.add_option("-o", "--output", dest="output", default="/tmp",
                       help="Output folder where the processed results will be written.")
-    parser.add_option("-e", "--euler", dest = "euler", default='../../lib',
+    parser.add_option("-e", "--euler", dest = "euler", default=None,
                       help = "Path to Euler.jar")
     parser.add_option("-c", "--clean", dest = "clean", default="True",
                       help = "Specifies whether the output directory should be clean after the execution.")
-    (options, args) = parser.parse_args()
+    options, _ = parser.parse_args()
     
-    # with reflection
     sim = simulation_subclass( append_slash_if_absent( options.input ),
                             append_slash_if_absent( options.output ),
-                            append_slash_if_absent( options.euler ) )
+                            # optional, not all the simulations will have it!
+                            None if options.euler is None else append_slash_if_absent( options.euler ) )
     
     sim.run()
     

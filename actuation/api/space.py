@@ -19,6 +19,14 @@ class Space(object):
         pass
     
     @abstractmethod
+    def take(self, template):
+        pass
+    
+    @abstractmethod
+    def take_by_uri(self, uri):
+        pass
+    
+    @abstractmethod
     def subscribe(self, template, callback):
         pass
 
@@ -29,4 +37,13 @@ class AbstractCallback(object):
 
     @abstractmethod
     def call(self):
+        pass
+
+
+class AbstractSubscriptionTemplate(object):
+    
+    __metaclass__ = ABCMeta
+    
+    @abstractmethod
+    def matches(self, graph):
         pass

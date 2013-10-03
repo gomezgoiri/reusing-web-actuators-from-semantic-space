@@ -1,0 +1,11 @@
+@prefix dbpedia:  <http://dbpedia.org/resource/> .
+@prefix ssn:  <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#> .
+@prefix actuators:  <http://example.org/lamp/actuators/> .
+@prefix : <http://example.org/>.
+
+
+# Adjustable lamp
+# sth/lamp
+
+:lamp a dbpedia:AjustableLamp ;
+      ssn:attachedSystem actuators:light .
