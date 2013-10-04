@@ -7,6 +7,7 @@ Created on Oct 2, 2013
 from rdflib.plugins.sparql import prepareQuery
 from actuation.api.space import Space, AbstractSubscriptionTemplate
 from actuation.impl.otsopy.dataaccess.store import DataAccess
+from actuation.utils import n3ql_to_sparql
 
 
 class CoordinationSpace(Space):
@@ -82,7 +83,7 @@ class SPARQLSubscriptionTemplate(AbstractSubscriptionTemplate):
     
     def __init__(self, query):
         """
-        @param templates: A list of SimpleSubscriptionTemplate objects
+        @param query: A SPARQL query
         """
         # E.g. 'select ?s where { ?person <http://xmlns.com/foaf/0.1/knows> ?s .}'
         self.query = prepareQuery( query )
@@ -91,3 +92,13 @@ class SPARQLSubscriptionTemplate(AbstractSubscriptionTemplate):
         if not graph.query( self.query ):
             return False
         return True
+
+
+class N3QLSubscriptionTemplate(SPARQLSubscriptionTemplate):
+    
+    def __init__(self, n3ql_query):
+        """
+        @param templates: A N3QL query
+        """
+        # E.g. 'select ?s where { ?person <http://xmlns.com/foaf/0.1/knows> ?s .}'
+        self.query = prepareQuery( n3ql_to_sparql( n3ql_query) )

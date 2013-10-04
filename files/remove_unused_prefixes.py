@@ -2,8 +2,6 @@
 
 import re
 from optparse import OptionParser
-from rdflib import Graph
-
 
 
 PATTERNS = {
@@ -13,49 +11,49 @@ PATTERNS = {
     "empty": re.compile("^\s*$", re.MULTILINE),
     "comment": re.compile("^\s*#", re.MULTILINE),
     "prefix_use": re.compile("([\w-]+):[\w-]+[,]? ") # super error-prone (e.g. what about string literals?)
-  }
-
+}
 
 def remove_unused_prefixes(input_file, output_file):
-    
     prefixes = {}
     used_prefixes = set()
     new_content = ""
     
     with open( input_file, "r" ) as inf:
-	content = inf.readlines()
-	
-	reading_prefixes = True
-	for line in content:
-	    if reading_prefixes:
-		match = PATTERNS["prefix"].search( line )
-		
-		if match is None:
-		    if not PATTERNS["empty"].match( line ) and not PATTERNS["comment"].match( line ) and not PATTERNS["prefix_main"].match( line ):
-			reading_prefixes = False # stop reading prefixes
-		    else:
-			new_content += line
-		else:
-		  pref = match.group('prefix')
-		  url = match.group('url')
-		  prefixes[pref] = url
-	 
-	    if not reading_prefixes:
-		#print prefixes
-		#print line
-		for match in PATTERNS["prefix_use"].findall( line ):
-		    used_prefixes.add( match )
-		new_content += line
-	
-	for up in used_prefixes:
-	    pline = "@prefix %s: %s .\n" % ( up, prefixes[up] )
-	    new_content = pline + new_content
-	
-	#print new_content
-	with open( output_file, "w" ) as ouf:
-	    ouf.write( new_content )
+        content = inf.readlines()
+        
+        reading_prefixes = True
+        for line in content:
+            if reading_prefixes:
+                match = PATTERNS["prefix"].search( line )
+            
+                if match is None:
+                    if not PATTERNS["empty"].match( line ) and not PATTERNS["comment"].match( line ) and not PATTERNS["prefix_main"].match( line ):
+                        reading_prefixes = False # stop reading prefixes
+                    else:
+                        new_content += line
+                else:
+                    pref = match.group('prefix')
+                    url = match.group('url')
+                    prefixes[pref] = url
+            
+            if not reading_prefixes:
+                #print prefixes
+                #print line
+                if not PATTERNS["empty"].match( line ) and not PATTERNS["comment"].match( line ) and not PATTERNS["prefix_main"].match( line ):
+                    for match in PATTERNS["prefix_use"].findall( line ):
+                        used_prefixes.add( match )
+                new_content += line
+            
+        for up in used_prefixes:
+            pline = "@prefix %s: %s .\n" % ( up, prefixes[up] )
+            new_content = pline + new_content
+        
+        #print new_content
+        with open( output_file, "w" ) as ouf:
+            ouf.write( new_content )
 
 
+# from rdflib import Graph
 # doesn't automatically remove the unused ones!
 #def remove_unused_prefixes(input_file, output_file):
 #    ig = Graph()
