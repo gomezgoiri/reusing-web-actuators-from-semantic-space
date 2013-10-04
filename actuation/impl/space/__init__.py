@@ -4,6 +4,7 @@ Created on Oct 2, 2013
 @author: tulvur
 '''
 
+from rdflib.plugins.sparql import prepareQuery
 from actuation.api.space import Space, AbstractSubscriptionTemplate
 from actuation.impl.otsopy.dataaccess.store import DataAccess
 
@@ -60,7 +61,8 @@ class SimpleSubscriptionTemplate(AbstractSubscriptionTemplate):
         t = graph.triples( self.template )
         return self.__has_next(t)
 
-    
+
+# TODO deprecate
 class AggregationSubscriptionTemplate(AbstractSubscriptionTemplate):
     
     def __init__(self, templates):
@@ -73,4 +75,19 @@ class AggregationSubscriptionTemplate(AbstractSubscriptionTemplate):
         for t in self.templates:
             if not t.matches( graph ):
                 return False
+        return True
+
+
+class SPARQLSubscriptionTemplate(AbstractSubscriptionTemplate):
+    
+    def __init__(self, query):
+        """
+        @param templates: A list of SimpleSubscriptionTemplate objects
+        """
+        # E.g. 'select ?s where { ?person <http://xmlns.com/foaf/0.1/knows> ?s .}'
+        self.query = prepareQuery( query )
+    
+    def matches(self, graph):
+        if not graph.query( self.query ):
+            return False
         return True

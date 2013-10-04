@@ -7,7 +7,7 @@ import unittest
 from mock import MagicMock
 from StringIO import StringIO
 from rdflib import Graph, Namespace
-from actuation.impl.space import CoordinationSpace
+from actuation.impl.space import CoordinationSpace, SimpleSubscriptionTemplate, SPARQLSubscriptionTemplate
 
 
 class CoordinationSpaceTest(unittest.TestCase):
@@ -16,13 +16,25 @@ class CoordinationSpaceTest(unittest.TestCase):
         example_ns = Namespace("http://example.org/lamp/")
         ucum_ns = Namespace("http://purl.oclc.org/NET/muo/ucum/")
         dul_ns = Namespace("http://www.loa.istc.cnr.it/ontologies/DUL.owl#")
+        ssn_ns = Namespace("http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#")
         
         self.space = CoordinationSpace("foo")
         self.subscription_templates = []
-        self.subscription_templates.append( (example_ns.nonexistent, None, None) )
-        self.subscription_templates.append( (example_ns.obsv1, None, None) )
-        self.subscription_templates.append( (None, dul_ns.isClassifiedBy, None) )
-        self.subscription_templates.append( (None, None, ucum_ns.watt) )
+        self.subscription_templates.append( SimpleSubscriptionTemplate( (example_ns.nonexistent, None, None) ) )
+        self.subscription_templates.append( SimpleSubscriptionTemplate( (example_ns.obsv1, None, None) ) )
+        self.subscription_templates.append( SimpleSubscriptionTemplate( (None, dul_ns.isClassifiedBy, None) ) )
+        self.subscription_templates.append( SimpleSubscriptionTemplate( (None, None, ucum_ns.watt) ) )
+        
+        self.subscription_templates.append( SPARQLSubscriptionTemplate("""
+           prefix ssn:  <%s>
+           prefix dul:  <%s>
+            
+            select ?obsv where {
+                ?obsv a ssn:ObservationValue .
+                ?obsv dul:hasDataValue 19 .   
+            }
+        """ % ( ssn_ns, dul_ns)
+        ) )
         
         self.callback_objects = []
         for s in self.subscription_templates:
@@ -74,7 +86,7 @@ class CoordinationSpaceTest(unittest.TestCase):
     
     def test_get_activated_subscriptions(self):
         subs = self.space._get_activated_subscriptions( self.graph1 )
-        self.assert_contains_callbacks( subs, (1, 2,) )        
+        self.assert_contains_callbacks( subs, (1, 2, 4,) )        
         subs = self.space._get_activated_subscriptions( self.graph2 )
         self.assert_contains_callbacks( subs, (2, 3,) )
 
