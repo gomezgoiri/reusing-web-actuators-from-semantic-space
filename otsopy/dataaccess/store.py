@@ -4,7 +4,7 @@ import random
 from copy import deepcopy
 from rdflib import ConjunctiveGraph, Graph
 
-from actuation.impl.otsopy.dataaccess.util import locked
+from otsopy.dataaccess.util import locked
 
 
 class DataAccess(object):
@@ -63,6 +63,11 @@ class DataAccess(object):
         store = self.get_space(space)
         return store.take_wildcard(subject, predicate, obj)
     
+    def take_sparql(self, query, space=None):
+        """Reads and removes a graph from the space."""
+        store = self.get_space(space)
+        return store.take_sparql(query)
+    
     def query_wildcard(self, subject, predicate, obj, space=None):
         """Returns all the triples in a *space* which match the *template*."""
         store = self.get_space(space)
@@ -107,12 +112,17 @@ class Store(object):
     def read_uri(self, uri):
         ret = Graph(self.graphs.store, uri)
         return deepcopy(ret) if ret else None
-
+    
     @locked
     def read_wildcard(self, subject, predicate, obj):
         gr = self._find_graph(subject, predicate, obj)
         return deepcopy(gr)
-
+    
+    @locked
+    def read_sparql(self, query):
+        gr = self._find_graph_sparql(query)
+        return deepcopy(gr)
+    
     @locked
     def take_uri(self, uri):
         ret = None
@@ -133,7 +143,18 @@ class Store(object):
             to_delete = self._find_graph(subject, predicate, obj)
             if to_delete is not None:
                 ret = deepcopy(to_delete)
-                to_delete.serialize(format="n3")
+                self.graphs.remove_context(to_delete)
+        except KeyError:
+            return None
+        return ret
+    
+    @locked
+    def take_sparql(self, query):
+        ret = None
+        try:
+            to_delete = self._find_graph_sparql(query)
+            if to_delete is not None:
+                ret = deepcopy(to_delete)
                 self.graphs.remove_context(to_delete)
         except KeyError:
             return None
@@ -145,9 +166,22 @@ class Store(object):
         for t in self.graphs.triples((subject, predicate, obj)):
             ret.add(t)
         return ret if len(ret)>0 else None
+    
+    @locked
+    def query_sparql(self, query):
+        ret = Graph()
+        for t in self.graphs.query( query ):
+            ret.add(t)
+        return ret if len(ret)>0 else None
 
     def _find_graph(self, subject, predicate, obj):
         for graph in self.graphs.contexts(): #(subject, predicate, obj)):
             for _ in graph.triples((subject, predicate, obj)):
                 return graph # if it has at least a triple matching that triple, we return the graph
+        return None
+    
+    def _find_graph_sparql(self, query):
+        for graph in self.graphs.contexts():
+            for _ in graph.query( query ):
+                return graph # if the graph match the  a triple matching that triple, we return the graph
         return None
