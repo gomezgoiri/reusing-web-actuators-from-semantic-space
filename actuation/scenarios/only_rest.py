@@ -1,8 +1,8 @@
 from actuation.proofs.reason import EulerReasoner
 from actuation.scenarios.abstract import AbstractSimulation, main
-from actuation.impl.rest.lamp.mock.provider import LampProviderRESTMock
-from actuation.impl.rest.lamp.mock.consumer import LampConsumerRESTMock
-from actuation.impl.rest.lamp.mock.discovery import MockDiscovery
+from actuation.impl.rest.lamp.provider import LampProviderRESTMock
+from actuation.impl.rest.lamp.consumer import LampConsumerRESTMock
+from actuation.impl.rest.mock.discovery import MockDiscovery
 
 
 class OnlyRESTDevicesSimulator(AbstractSimulation):

@@ -5,7 +5,7 @@ Created on Sep 20, 2013
 '''
 
 from actuation.api import Node
-from actuation.impl.rest.lamp.mock.agents import Crawler, PlanAchiever
+from actuation.impl.rest.mock.agents import Crawler, PlanAchiever
 from actuation.proofs.plan import LemmaGraphFactory
 
 
