@@ -1,8 +1,4 @@
 from actuation.api.rest import RESTProvider
-from actuation.api import Node
-from actuation.proofs.preprocess import Preprocessor
-from actuation.proofs.plan import LemmaPrecedencesGraph
-from actuation.proofs.parsers.lemmas import LemmasParser
 
 
 class Crawler(object):
