@@ -22,6 +22,38 @@ from actuation.proofs.preprocess import Preprocessor
 from actuation.proofs.parsers.lemmas import LemmasParser
 
 
+class LemmaGraphFactory(object):
+    """
+    This class is a factory for LemmaPrecedencesGraph.
+        
+    In some way, it can be seen as an entry point to the whole proofs module
+    because it encapsulates all the needed substeps to generate a graph.
+    """
+    
+    def __init__(self, output_folder, reasoner):
+        self.output_folder = output_folder
+        self.reasoner = reasoner
+    
+    def _create_plan(self, query_goal_path, rule_paths):
+        output_file_path = self.reasoner.query_proofs( rule_paths ,
+                                                 query_goal_path,
+                                                 self.output_folder + "plan.n3" ) # Write the plan into a file
+        return output_file_path
+    
+    def create(self, query_goal_path, all_knowledge):
+        """
+        This method creates a graph with the steps needed to achieve a goal.
+        """
+        plan_filepath = self._create_plan(query_goal_path, all_knowledge )
+        Preprocessor.preprocess( plan_filepath, self.output_folder, self.reasoner )
+        lemmas = LemmasParser.parse_file( self.output_folder + Preprocessor.get_output_filename("services"),
+                                          self.output_folder + Preprocessor.get_output_filename("bindings"),
+                                          self.output_folder + Preprocessor.get_output_filename("evidences") )
+        return LemmaPrecedencesGraph( self.output_folder + Preprocessor.get_output_filename("precedences"),
+                                      lemmas )
+        #lemma_graph.to_image( output_file = self.output_folder + "lemma_precedences.png" )
+        #lemma_graph.to_gml( output_file = self.output_folder + "lemma_precedences.gml" )
+
 
 # TODO rethink/reorder URI or str, when and where?
 # To be used with "lemma_precedences.txt"

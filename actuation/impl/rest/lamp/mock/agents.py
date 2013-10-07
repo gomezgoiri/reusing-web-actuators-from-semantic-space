@@ -3,11 +3,10 @@ from actuation.api.rest import RESTProvider
 
 class Crawler(object):
     
-    def __init__(self, input_folder, discovery):
+    def __init__(self, discovery):
         self.discovery = discovery
         self._descriptions = set()
         self._base_knowledge = set()
-        self.preference_file = input_folder + "additional_info.n3"
     
     # or directly update in the constructor
     def update(self):
@@ -35,7 +34,6 @@ class Crawler(object):
                     if hasattr(resource, 'get'): # maybe it does not implement it
                         opts = resource.get()
                         self._base_knowledge.add( opts ) # == append in lists
-        self._base_knowledge.add( self.preference_file )
     
     @property
     def descriptions(self):
@@ -44,3 +42,40 @@ class Crawler(object):
     @property
     def base_knowledge(self):
         return self._base_knowledge
+
+
+class PlanAchiever(object):
+    
+    def __init__(self, lgraph, discovery):
+        self.lgraph = lgraph
+        self.discovery = discovery
+    
+    def __make_call(self, lemma):
+        # TODO the output of a call should be parsed: it may be the input of another one
+        nret = self.discovery.get_node( lemma.rest.request_uri )
+        if nret:
+            node, remaining_path = nret
+            rsc = node.get_resource( remaining_path )
+            
+            if rsc is None:
+                print "Resource '%s' not found in node." % (remaining_path)
+            else:
+                met = str(lemma.rest.method)
+                if met == "POST":
+                    body = lemma.get_binding( lemma.rest.var_body )
+                    return rsc.post( body )
+                elif met == "GET":
+                    return rsc.get()
+                else:
+                    raise Exception( "TODO, HTTP verb: %s" % (lemma.rest.method) )
+        else:
+            print "Node not found"
+        
+    
+    def achieve(self):
+        for n in self.lgraph.get_shortest_path():
+            #print n
+            if n.is_rest_call():
+                # deliberated ignore of the return
+                # in this project we just check a simple path composed by a unique rest call 
+                self.__make_call( n )
