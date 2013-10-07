@@ -7,8 +7,8 @@ import unittest
 from random import shuffle
 from mock import MagicMock
 from actuation.api.rest import RESTProvider
-from actuation.impl.rest.lamp.mock.discovery import MockDiscovery
-from actuation.impl.rest.lamp.mock.agents import Crawler
+from actuation.impl.rest.mock.discovery import MockDiscovery
+from actuation.impl.rest.mock.agents import Crawler
 
 
 # Through these 2 classes, we indirectly test LampConsumerRESTMock
@@ -18,7 +18,7 @@ class CrawlerTest(unittest.TestCase):
     def setUp(self):
         self.discovery = MockDiscovery()        
         self.discovery.add_discovered( ProvidersFactory.create_mock_providers(), "fakename" )
-        self.crawler= Crawler("", self.discovery)
+        self.crawler= Crawler( self.discovery )
     
     def test_obtain_resource_descriptions(self):
         self.crawler._obtain_resource_descriptions()
