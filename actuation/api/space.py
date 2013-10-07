@@ -19,7 +19,11 @@ class Space(object):
         pass
     
     @abstractmethod
-    def take(self, template):
+    def take_by_wildcard(self, template):
+        pass
+    
+    @abstractmethod
+    def take_by_sparql(self, query):
         pass
     
     @abstractmethod

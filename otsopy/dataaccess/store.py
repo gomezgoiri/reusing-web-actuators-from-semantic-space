@@ -53,6 +53,12 @@ class DataAccess(object):
         store = self.get_space(space)
         return store.read_wildcard(subject, predicate, obj)
     
+    def read_sparql(self, query, space=None):
+        """Reads a graph with a triple which matches a *query* from the *space*.
+        This operation is non deterministic and returns *None* when no graph is found."""
+        store = self.get_space(space)
+        return store.read_sparql(query)
+    
     def take_uri(self, uri, space=None):
         """Reads and removes a graph from the space."""
         store = self.get_space(space)
@@ -72,6 +78,11 @@ class DataAccess(object):
         """Returns all the triples in a *space* which match the *template*."""
         store = self.get_space(space)
         return store.query_wildcard(subject, predicate, obj)
+    
+    def query_sparql(self, query, space=None):
+        """Returns all the triples in a *space* which match the *query*."""
+        store = self.get_space(space)
+        return store.query_sparql(query)
 
 
 class Store(object):

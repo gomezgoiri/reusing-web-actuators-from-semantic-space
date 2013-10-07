@@ -16,15 +16,15 @@ class LampConsumerSpaceMock(Node):
     def __init__(self, space, input_folder, output_folder, debug = False):
         self.space = space
         self.task_file_tpl = input_folder + "task.n3.tpl"
-        self.task_file = output_folder + "task.n3.tpl"
+        self.task_file = output_folder + "task.n3"
         self.__debug = debug
     
     def start(self):
         pass
     
     def stop(self):
-        pass        
-            
+        pass
+    
     def __read_graph(self, filepath_or_stringio):
         g = Graph()
         g.parse( filepath_or_stringio, format="n3" )

@@ -1,3 +1,6 @@
+from rdflib import Literal
+from rdflib.plugins.sparql import prepareQuery
+
 from actuation.scenarios.abstract import AbstractSimulation, main
 from actuation.impl.space import CoordinationSpace
 from actuation.impl.space.lamp.mock.provider import LampProviderSpaceMock
@@ -42,7 +45,25 @@ class OnlySpaceBasedDevicesSimulator(AbstractSimulation):
         self.lc.write_task()
     
     def check(self):
-        return False
+        q = """
+            prefix : <http://example.org/lamp/>
+            prefix sweet:  <http://sweet.jpl.nasa.gov/>
+            prefix frap: <http://purl.org/frap/>
+            prefix dul:  <http://www.loa.istc.cnr.it/ontologies/DUL.owl#>
+            prefix ssn:  <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#>
+            prefix ucum:  <http://purl.oclc.org/NET/muo/ucum/>
+            prefix actuators:  <http://example.org/lamp/actuators/>
+        
+            construct { <http://whatev/s> <http://whatev/o> ?val } where {
+                actuators:light ssn:madeObservation ?measure .
+                ?measure ssn:observationResult ?observationr .
+                ?observationr ssn:hasValue ?observationv .
+                ?s dul:hasDataValue ?val .
+            }"""
+        val = self.space.query_by_sparql( prepareQuery( q ) )
+        l = val.triples((None,None,None)).next()[2]
+        #print "%s" % l
+        return Literal(30) == l
 
 
 if __name__ == '__main__':
