@@ -5,10 +5,11 @@ Created on Oct 4, 2013
 '''
 import re
 import unittest
-from actuation.utils import _construct_sparql_select, _parse_prefixes, _extract_uncommented_premise, _parse_variable_names
+from rdflib.term import Variable
+from actuation.utils.conversors import QueryLanguageConversor, N3QLParser
 
 
-goal1 = """
+goal_n3ql = """
 @prefix sweet:  <http://sweet.jpl.nasa.gov/> .
 @prefix dul:  <http://www.loa.istc.cnr.it/ontologies/DUL.owl#> .
 @prefix ssn:  <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#> .
@@ -43,25 +44,70 @@ goal1 = """
 """
 
 
-class TestUtils(unittest.TestCase):
+sparql_query = """
+prefix : <http://example.org/lamp/>
+prefix sweet:  <http://sweet.jpl.nasa.gov/>
+prefix ssn:  <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#>
+prefix actuators:  <http://example.org/lamp/actuators/>
 
-    # n3ql_to_sparql is indirectly tested through its subfunctions' tests:
-    #    + test_construct_sparql_select_fail
-    #    + test_construct_sparql_select_without_prefixes
-    #    + test_n3ql_to_sparql
+select ?val where {
+  actuators:light ssn:madeObservation ?light .
+  # comment
+  ?light ssn:observedProperty  sweet:Light ;
+         ssn:observationResult ?so .
+}
+"""
 
-    def test_construct_sparql_select_fail(self):
+
+class TestQueryLanguageConversor(unittest.TestCase):
+
+    def setUp(self):
+        self.qlc = QueryLanguageConversor()
+
+    # QueryLanguageConversor is indirectly tested through its subfunctions' tests:
+    #    + test_to_sparql_select_fail
+    #    + test_to_sparql_select_without_prefixes
+    #    + test_to_n3ql_goal
+    #    + test_parse_sparql
+    # ...and TestN3QLParser.
+
+    def test_to_sparql_select_fail(self):
         try:
-            _construct_sparql_select({}, [], "?s ?p ?o .")
+            self.qlc._variabs = []
+            self.qlc._to_sparql_select()
             self.fail()
         except:
-            pass
+            pass        
     
-    def test_construct_sparql_select_without_prefixes(self):
-        q = _construct_sparql_select({}, ["s","p","o"], "?s ?p ?o .")
+    def test_to_sparql_select_without_prefixes(self):
+        self.qlc._prefixes = {}
+        self.qlc._variabs = ["s","p","o"]
+        self.qlc._premise = "?s ?p ?o ."
+        q = self.qlc._to_sparql_select()
         ptt = re.compile( "^\s*select \s*[?]s, [?]p, [?]o\s*where\s*{\s*[?]s [?]p [?]o .\s*}", re.MULTILINE | re.DOTALL )
         self.assertTrue( ptt.search(q) )
+    
+    def test_to_n3ql_goal(self):
+        self.qlc._prefixes = {}
+        self.qlc._variabs = ["s","p","o"]
+        self.qlc._premise = "?s ?p ?o ."
+        q = self.qlc._to_n3ql_goal()
+        ptt = re.compile( "^\s*{\s*[?]s [?]p [?]o .\s*}\s*=>\s*{\s*[?]s [?]p [?]o .\s*}\s*.", re.MULTILINE | re.DOTALL )
+        self.assertTrue( ptt.search(q) )
+    
+    def test_parse_sparql(self):
+        # It is not necessary to test all cases, I assume that RDFLib is already tested.
+        # Anyway, I'll check a basic case to test that I'm using RDFLib properly.
+        self.qlc.parse( sparql_query, formt="sparql" )
+        self.assertItemsEqual( self.qlc._variabs, ( Variable("val"), Variable("light"), Variable("so") ) )
+        # Like this, because I don't know the order of the lines in the serialization
+        self.assertTrue( " <http://example.org/lamp/actuators/light> <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#madeObservation> ?light .\n" in self.qlc._premise )
+        self.assertTrue( " ?light <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#observedProperty> <http://sweet.jpl.nasa.gov/Light> .\n" in self.qlc._premise )
+        self.assertTrue( " ?light <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#observationResult> ?so .\n" in self.qlc._premise )
 
+
+class TestN3QLParser(unittest.TestCase):
+    
     def test_parse_prefixes(self):
         expected = { "": "http://example.org/lamp/",
                      "sweet": "http://sweet.jpl.nasa.gov/",
@@ -69,7 +115,7 @@ class TestUtils(unittest.TestCase):
                      "ssn": "http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#",
                      "ucum": "http://purl.oclc.org/NET/muo/ucum/",
                      "actuators": "http://example.org/lamp/actuators/" }
-        got = _parse_prefixes( goal1 )
+        got = N3QLParser._parse_prefixes( goal_n3ql )
         self.assertEquals( got, expected )
     
     def test_extract_uncommented_premise(self):
@@ -80,7 +126,7 @@ class TestUtils(unittest.TestCase):
                  "?ov a ssn:ObservationValue ;",
                  "dul:isClassifiedBy  ucum:lux ;",
                  "dul:hasDataValue 19 ." ]
-        got = _extract_uncommented_premise( goal1 )
+        got = N3QLParser._extract_uncommented_premise( goal_n3ql )
         
         for l in got.split("\n"):
             st = l.strip()
@@ -88,9 +134,8 @@ class TestUtils(unittest.TestCase):
                 self.assertTrue( l.strip() in lines, l + " was not expected" )
     
     def test_parse_variable_names(self):
-        got = _parse_variable_names( "?v1 \n?v2\n blahblah? ?v3 ." )
-        self.assertItemsEqual(got, ("v1", "v2", "v3"))
-
+        got = N3QLParser._parse_variable_names( "?v1 \n?v2\n blahblah? ?v3 ." )
+        self.assertItemsEqual(got, (Variable("v1"), Variable("v2"), Variable("v3")))
 
 
 if __name__ == "__main__":
