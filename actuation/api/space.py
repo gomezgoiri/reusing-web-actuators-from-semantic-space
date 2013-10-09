@@ -15,7 +15,11 @@ class Space(object):
         pass
     
     @abstractmethod
-    def read(self, template):
+    def read_by_wildcard(self, template):
+        pass
+    
+    @abstractmethod
+    def read_by_sparql(self, query):
         pass
     
     @abstractmethod
@@ -50,4 +54,13 @@ class AbstractSubscriptionTemplate(object):
     
     @abstractmethod
     def matches(self, graph):
+        pass
+
+
+class AbstractSubscriptionObserver(object): # local observer
+    
+    __metaclass__ = ABCMeta
+    
+    @abstractmethod
+    def notify_subscription(self, template):
         pass

@@ -5,9 +5,10 @@ Created on Oct 8, 2013
 '''
 
 import re
-from rdflib.term import Variable
+from rdflib import XSD
+from rdflib.term import Variable, Literal
 from rdflib.plugins.sparql import prepareQuery
-
+from rdflib.plugins.sparql.sparql import Query
 
 
 class QueryLanguageConversor(object):
@@ -41,8 +42,8 @@ class QueryLanguageConversor(object):
         }
         """
         qlc = QueryLanguageConversor()
-        qlc.parse( n3ql_query, format="n3ql" )
-        return qlc.serialize( format="sparql" )
+        qlc.parse( n3ql_query, formAt="n3ql" )
+        return qlc.serialize( formAt="sparql" )
 
     @staticmethod
     def sparql_to_n3ql( sparql_query ):
@@ -70,8 +71,8 @@ class QueryLanguageConversor(object):
         Note that it doesn't use prefixes.
         """
         qlc = QueryLanguageConversor()
-        qlc.parse( sparql_query, format="sparql" )
-        return qlc.serialize( format="n3ql" )
+        qlc.parse( sparql_query, formAt="sparql" )
+        return qlc.serialize( formAt="n3ql" )
     
     def __init__(self):
         self._prefixes = {}
@@ -79,16 +80,25 @@ class QueryLanguageConversor(object):
         self._premise = ""
     
     def _triple_to_n3(self, triple):
-        return " %s %s %s ." % ( triple[0].n3(), triple[1].n3(), triple[2].n3() )  
+        ret = " %s %s " % ( triple[0].n3(), triple[1].n3() )
+        if isinstance(triple[2], Literal):
+            if triple[2].datatype == XSD.integer:
+                ret += "%s" % triple[2].value
+        else:
+            ret += "%s" % triple[2].n3()
+        return ret + " ."
     
-    def parse(self, query, formt):
-        formt = formt.lower()
+    def parse(self, query, formAt):
+        formt = formAt.lower()
         if formt=="n3ql":
             self._prefixes = N3QLParser._parse_n3ql_prefixes( query )
             self._premise = N3QLParser._extract_n3ql_uncommented_premise( query )
             self._variabs = N3QLParser._parse_n3ql_variable_names( self._premise )
         elif formt=="sparql":
-            query = prepareQuery( query )
+            # if "query" is already a "Query" object, it's ok
+            if not isinstance(query, Query):
+                # if "query" is a string, build the Query object
+                query = prepareQuery( query )
             self._variabs = query.algebra._vars
             self._premise = ""
             for triple in query.algebra.p['p']['triples']:
@@ -96,10 +106,10 @@ class QueryLanguageConversor(object):
         else:
             raise Exception( "Query language format '%s' unsupported." % formt )
     
-    def serialize(self, formt):
-        formt = formt.lower()
+    def serialize(self, formAt):
+        formt = formAt.lower()
         if formt=="n3ql":
-            pass
+            return self._to_n3ql_goal()
         elif formt=="sparql":
             return self._to_sparql_select()
         else:
@@ -125,7 +135,7 @@ class QueryLanguageConversor(object):
     def _to_n3ql_goal( self ):
         if len(self._variabs)==0:
             raise Exception("The N3QL rule must contain at least a variable.")
-        return "{ %s } => { %s }.\n" % (self._premise, self._premise) 
+        return "{\n%s\n} => {\n%s\n}.\n" % (self._premise, self._premise) 
 
 
 class N3QLParser(object):

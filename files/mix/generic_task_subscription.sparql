@@ -1,0 +1,5 @@
+prefix frap: <http://purl.org/frap/>
+
+select ?pref where {
+	?pref a frap:Preference .
+}

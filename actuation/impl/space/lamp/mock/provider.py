@@ -44,6 +44,8 @@ class LampProviderSpaceMock(Node, AbstractCallback):
         
         self._replace_light_graph( self.init_light_val )
         del self.init_light_val
+        
+        self._subscribe_task()
     
     def stop(self):
         pass
@@ -53,7 +55,7 @@ class LampProviderSpaceMock(Node, AbstractCallback):
         g.parse( filepath_or_stringio, format="n3" )
         return g
     
-    def subscribe_task(self):
+    def _subscribe_task(self):
         self.space.subscribe(self.subscription_to_task, self)
     
     def _create_light_graph(self, value):

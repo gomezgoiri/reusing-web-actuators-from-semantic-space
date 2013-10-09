@@ -7,14 +7,18 @@ Created on Oct 2, 2013
 from rdflib.plugins.sparql import prepareQuery
 from actuation.api.space import Space, AbstractSubscriptionTemplate
 from otsopy.dataaccess.store import DataAccess
-from actuation.utils import n3ql_to_sparql
+from actuation.utils.conversors import QueryLanguageConversor
 
 
 class CoordinationSpace(Space):
     
+    GRAPH_LEVEL = 0
+    SPACE_LEVEL = 1 
+    
     def __init__(self, space_name):
         self._da = DataAccess( defaultSpace = space_name )
-        self._subscriptions = [] # tuple: (subscription template, callback)
+        self._subscriptions = [] # tuple: (subscription template, callback, level)
+        self._observers = []
     
     def write(self, triples):
         ret = self._da.write(triples)
@@ -29,13 +33,23 @@ class CoordinationSpace(Space):
     
     def _get_activated_subscriptions(self, graph):
         ret = []
-        for template, callback in self._subscriptions:
-            if template.matches( graph ):
-                ret.append( callback )
+        for template, callback, level in self._subscriptions:
+            if level == CoordinationSpace.GRAPH_LEVEL:
+                if template.matches( graph ):
+                    ret.append( callback )
+            elif level == CoordinationSpace.SPACE_LEVEL:
+                # over all the space!
+                if template.matches( self._da.get_space(None).graphs ):
+                    ret.append( callback )
+            else:
+                raise Exception( "Level %d does not exist" % level )
         return ret
     
-    def read(self, template):
+    def read_by_wildcard(self, template):
         return self._da.read_wildcard( *template )
+    
+    def read_by_sparql(self, query):
+        return self._da.read_sparql( query )
     
     def take_by_wildcard(self, template):
         return self._da.take_wildcard( *template )
@@ -49,8 +63,15 @@ class CoordinationSpace(Space):
     def query_by_sparql(self, query):
         return self._da.query_sparql( query )
     
-    def subscribe(self, template, callback):
-        self._subscriptions.append( (template, callback) )
+    def subscribe(self, template, callback, level = 0 ):
+        self._subscriptions.append( (template, callback, level) )
+        # warn to the observers if any
+        for observer in self._observers:
+            if level == CoordinationSpace.SPACE_LEVEL: # not necessarily, but to filter in this scenario...
+                observer.notify_subscription( template )
+    
+    def add_subscription_observer(self, observer):
+        self._observers.append( observer )
 
 
 class SimpleSubscriptionTemplate(AbstractSubscriptionTemplate):
@@ -108,4 +129,4 @@ class N3QLSubscriptionTemplate(SPARQLSubscriptionTemplate):
         @param templates: A N3QL query
         """
         # E.g. 'select ?s where { ?person <http://xmlns.com/foaf/0.1/knows> ?s .}'
-        super(N3QLSubscriptionTemplate, self).__init__( n3ql_to_sparql( n3ql_query) )
+        super(N3QLSubscriptionTemplate, self).__init__( QueryLanguageConversor.n3ql_to_sparql( n3ql_query) )

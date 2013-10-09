@@ -40,11 +40,13 @@ class OnlySpaceBasedDevicesSimulator(AbstractSimulation):
         '''
         Executes the scenario where the consumer tries to change the light in the environment.
         '''
-        self.lp.subscribe_task()
-        # do sth
-        self.lc.write_task()
+        light_value = 30
+        self.lc.subscribe_to_result(light_value)
+        self.lc.write_task(light_value)
     
     def check(self):
+        # This could be done also by the consumer to check if everything went OK or nothing changed.
+        # E.g. it subscribes to that and querying...
         q = """
             prefix : <http://example.org/lamp/>
             prefix sweet:  <http://sweet.jpl.nasa.gov/>
@@ -55,10 +57,10 @@ class OnlySpaceBasedDevicesSimulator(AbstractSimulation):
             prefix actuators:  <http://example.org/lamp/actuators/>
         
             construct { <http://whatev/s> <http://whatev/o> ?val } where {
-                actuators:light ssn:madeObservation ?measure .
+                #actuators:light ssn:madeObservation ?measure .
                 ?measure ssn:observationResult ?observationr .
                 ?observationr ssn:hasValue ?observationv .
-                ?s dul:hasDataValue ?val .
+                ?observationv dul:hasDataValue ?val .
             }"""
         val = self.space.query_by_sparql( prepareQuery( q ) )
         l = val.triples((None,None,None)).next()[2]

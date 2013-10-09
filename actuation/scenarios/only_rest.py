@@ -39,7 +39,7 @@ class OnlyRESTDevicesSimulator(AbstractSimulation):
         '''
         Executes the scenario where the consumer tries to change the light in the environment.
         '''
-        # do sth
+        # we could make this goal a template also
         self.lc.achieve_goal( self.input_folder + "light_goal.n3" )
     
     def check(self):
