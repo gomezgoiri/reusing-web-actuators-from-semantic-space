@@ -57,4 +57,4 @@ I encourage you to check the code and give me any interesting feedback you want 
 License
 -------
 
-Check [COPYING.txt](https://github.com/gomezgoiri/actuationOnTripleSpace/blob/master/COPYING.txt).
+Check the [COPYING file](https://github.com/gomezgoiri/actuationOnTripleSpace/blob/master/COPYING).
