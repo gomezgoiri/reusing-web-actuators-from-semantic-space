@@ -1,5 +1,5 @@
-Actuation using Triple Space
-============================
+Actuation using Triple Spaces
+=============================
 
 This project implements a very basic scenario in three different ways to show:
 
