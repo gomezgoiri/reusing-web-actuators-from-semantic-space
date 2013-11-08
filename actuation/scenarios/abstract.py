@@ -73,7 +73,7 @@ def main( simulation_subclass ):
     parser.add_option("-o", "--output", dest="output", default="/tmp",
                       help="Output folder where the processed results will be written.")
     parser.add_option("-e", "--euler", dest = "euler", default=None,
-                      help = "Path to Euler.jar")
+                      help = "Path to the Euler jar (e.g. '../Euler.jar')")
     parser.add_option("-c", "--clean", dest = "clean", default="True",
                       help = "Specifies whether the output directory should be clean after the execution.")
     options, _ = parser.parse_args()
@@ -81,7 +81,8 @@ def main( simulation_subclass ):
     sim = simulation_subclass( append_slash_if_absent( options.input ),
                             append_slash_if_absent( options.output ),
                             # optional, not all the simulations will have it!
-                            None if options.euler is None else append_slash_if_absent( options.euler ) )
+                            options.euler ) # we do not expect a path there anymore
+                            #None if options.euler is None else append_slash_if_absent( options.euler ) )
     
     sim.run()
     

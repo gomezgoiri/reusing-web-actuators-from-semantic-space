@@ -124,8 +124,8 @@ if __name__ == '__main__':
                       help="File to process")
     parser.add_option("-o", "--output", dest="output", default="/tmp",
                       help="Output folder where the processed results will be written.")
-    parser.add_option("-e", "--euler", dest = "euler", default='../../../../',
-                      help = "Path to Euler.jar")
+    parser.add_option("-e", "--euler", dest = "euler", default='../../../../Euler.jar',
+                      help = "Path to Euler jar")
     (options, args) = parser.parse_args()
 
     from actuation.proofs.reason import EulerReasoner

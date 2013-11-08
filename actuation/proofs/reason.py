@@ -14,25 +14,26 @@
 '''
 
 import subprocess
-from actuation.utils.files import append_slash_if_absent
-
 
 class EulerReasoner(object):
     '''
     Gateway to call to euler/EYE resoner
     '''
-
+    
     def __init__( self, euler_path ):
-        self.euler_path = append_slash_if_absent( euler_path ) # TODO should be checked previously
+        '''
+            @param euler_path: Path to the Euler jar (e.g. 'path/Euler.jar')
+        '''
+        self.euler_path = euler_path
     
     def _generic_query( self, input_files, query_file, optional_args, output_file_path = None ):
         '''
         This method invokes Euler (EYE) in the following way:
         
-        java -jar path/Euler.jar [optional_args] [input_files] --query [goal_file] 
+        java -jar [Euler-jar] [optional_args] [input_files] --query [goal_file] 
         '''
         
-        call = ['java', '-jar', self.euler_path + 'Euler.jar']
+        call = ['java', '-jar', self.euler_path]
         call += optional_args
         
         if isinstance(input_files, (list, tuple, set)):
@@ -57,12 +58,12 @@ class EulerReasoner(object):
         '''
         This method invokes Euler (EYE) in the following way:
         
-        java -jar path/Euler.jar --nope [input_files] --query [goal_file] 
+        java -jar [Euler-jar] --nope [input_files] --query [goal_file] 
         
         
         Or, if output_file_path is provided:
         
-        java -jar path/Euler.jar --nope [input_files] --query [goal_file] > [output_file]
+        java -jar [Euler-jar] --nope [input_files] --query [goal_file] > [output_file]
         '''
         return self._generic_query( input_files, query_file, ["--nope",], output_file_path )
     
@@ -71,6 +72,6 @@ class EulerReasoner(object):
         '''
         This method invokes Euler (EYE) in the following way:
         
-        java -jar path/Euler.jar [input_files] --query [goal_file] 
+        java -jar [Euler-jar] [input_files] --query [goal_file] 
         '''        
         return self._generic_query( input_files, query_file, [], output_file_path )        

@@ -108,7 +108,7 @@ class TestQueryLanguageConversor(unittest.TestCase):
     def test_parse_sparql(self):
         # It is not necessary to test all cases, I assume that RDFLib is already tested.
         # Anyway, I'll check a basic case to test that I'm using RDFLib properly.
-        self.qlc.parse( sparql_query, formt="sparql" )
+        self.qlc.parse( sparql_query, formAt="sparql" )
         self.assertItemsEqual( self.qlc._variabs, ( Variable("val"), Variable("light"), Variable("so") ) )
         # Like this, because I don't know the order of the lines in the serialization
         self.assertTrue( " <http://example.org/lamp/actuators/light> <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#madeObservation> ?light .\n" in self.qlc._premise )
