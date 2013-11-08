@@ -30,8 +30,11 @@
             http:resp [ http:body ?lightObs ].
   
   actuators:light ssn:madeObservation ?lightObs .
-
-  # We need to provide this too to specify that the new resource's value would be the provided one!
+  
+  
+  # We need to provide the following additional information to specify that
+  #   the new resource's value would be the provided one.
+  # Otherwise, how could we represent that in ?lightObs we can find the desired value and not any other one?
   
   ?lightObs a ssn:Observation ;
          ssn:observedProperty sweet:Light ;

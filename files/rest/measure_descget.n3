@@ -7,7 +7,7 @@
 @prefix dul: <http://www.loa.istc.cnr.it/ontologies/DUL.owl#>.
 
 
-# Service 1: adjustable lamp
+# lamp/actuators/light/measureX
 
 {
 	actuators:light ssn:madeObservation ?light_obs .
@@ -16,12 +16,14 @@
 {
   _:request http:methodName "GET" ;
             http:requestURI ?light_obs ;
-            #http:body actuators:light ;
             http:resp [ http:body ?light_obs ].
+  
+  # Returns an "Observation"
+  #   ( it's more a way to represent value the actuator has at a given time )
   
   ?light_obs a  ssn:Observation ;
          ssn:observedProperty  sweet:Light ;
-         ssn:observedBy actuators:light ; # redundant madeObservation
+         ssn:observedBy actuators:light ; # redundant with ssn:madeObservation
          ssn:observationResult ?so .
      
   ?so ssn:hasValue ?ov .
