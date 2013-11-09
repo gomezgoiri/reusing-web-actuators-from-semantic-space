@@ -15,7 +15,7 @@
 
 from actuation.api import Node
 from actuation.impl.rest.mock.agents import Crawler, PlanAchiever
-from actuation.proofs.plan import LemmaGraphFactory
+from actuation.proofs.plan import PlanFactory
 
 
 class LampConsumerRESTMock(Node):
@@ -26,7 +26,7 @@ class LampConsumerRESTMock(Node):
         self._uncrawled_kb = input_folder + "additional_info.n3"
         
         self.crawler = Crawler( discovery )
-        self.lgraph_factory = LemmaGraphFactory( output_folder, reasoner )
+        self.lgraph_factory = PlanFactory( output_folder, reasoner )
     
     def start(self):
         self.crawler.update()

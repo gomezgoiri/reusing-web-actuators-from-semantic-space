@@ -18,7 +18,7 @@ from actuation.api import Node
 from actuation.api.space import AbstractSubscriptionObserver, AbstractCallback
 from actuation.impl.rest.mock.agents import Crawler, PlanAchiever
 from actuation.impl.space import SPARQLSubscriptionTemplate
-from actuation.proofs.plan import LemmaGraphFactory
+from actuation.proofs.plan import PlanFactory
 from actuation.utils.conversors import QueryLanguageConversor
 
 
@@ -37,7 +37,7 @@ class IntermediaryAgent(Node, AbstractSubscriptionObserver, AbstractCallback):
         self.output_folder = output_folder
         
         self.crawler = Crawler( discovery )
-        self.lgraph_factory = LemmaGraphFactory( output_folder, reasoner )
+        self.lgraph_factory = PlanFactory( output_folder, reasoner )
         self._generic_template_for_preference_fp = input_folder + "generic_task_subscription.sparql"
         self._all_kb_fp = self.output_folder + "all_knowledge_base.n3"
     

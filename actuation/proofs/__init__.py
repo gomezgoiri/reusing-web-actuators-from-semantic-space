@@ -32,6 +32,7 @@ class Namespaces(object):
     """
     
     HTTP = Namespace("http://www.w3.org/2011/http#")
+    LIST = Namespace("http://www.w3.org/2000/10/swap/list#")
     LOG = Namespace("http://www.w3.org/2000/10/swap/log#")
     REASON = Namespace("http://www.w3.org/2000/10/swap/reason#")
     VAR = Namespace("http://localhost/var#")
@@ -60,20 +61,21 @@ class Lemmas(object):
             self._lemmas[s_lname] = Lemma()
         return self._lemmas[s_lname]
             
-    def add_bindings(self, lemma, bindings):
-        self._get_and_create_if_not_exists( lemma ).bindings = bindings
-    
-    def add_rest_call(self, lemma, rest_call):
-        self._get_and_create_if_not_exists( lemma ).rest = rest_call
-    
-    def add_evidence_templates(self, lemma, templates):
-        self._get_and_create_if_not_exists( lemma ).evidence_templates = templates
-    
+    def add(self, name, lemma):
+        self._lemmas[str( name )] = lemma
+        
     def get_lemma(self, lemma_name):
         s_lname = str( lemma_name )
         if s_lname in self._lemmas:
             return self._lemmas[s_lname]
         return None
+    
+    def get_parent_lemmas(self):
+        ret = []
+        for name, lemma in self._lemmas.iteritems():
+            if lemma.evidence_lemmas: # one or more evidence
+                ret.append( ( name, lemma ) )
+        return ret
     
     def __repr__(self):
         s = "(\n"
@@ -91,23 +93,12 @@ class Lemma(object):
     A lemma has some evidence templates (premises), a rest call (consequence) and some values to make that call (bindings). 
     """
     
-    def __init__(self):
-        self.rest = None
-        self._bindings = set()
-        self.evidence_templates = []
+    def __init__(self, rest_info, bindings, evidence_lemmas):
+        self.rest = rest_info
+        self._set_bindings(bindings)
+        self.evidence_lemmas = evidence_lemmas
     
-    def get_binding(self, var):
-        for binding in self.bindings:
-            if binding.variable == var:
-                return binding.bound
-        else: return None
-    
-    @property
-    def bindings(self):
-        return self._bindings
-    
-    @bindings.setter
-    def bindings(self, bindings): # to ensure that bindings is a list and therefore can be compared with other list
+    def _set_bindings(self, bindings): # to ensure that bindings is a list and therefore can be compared with other list
         if isinstance(bindings, (list, tuple)):
             self._bindings = set(bindings)
         elif isinstance(bindings, set):
@@ -115,8 +106,15 @@ class Lemma(object):
         else:
             raise Exception("It should be a list, tuple or set!")
     
+    def get_binding(self, var):
+        for binding in self._bindings:
+            if binding.variable == var:
+                return binding.bound
+        else: return None
+    
+    # TODO rename to more descriptive contain_equivalent_rest_calls
     def equivalent_rest_calls(self, other_lemma):
-        ret = self.rest == other_lemma.rest and self.bindings == other_lemma.bindings # same bindings
+        ret = self.rest == other_lemma.rest and self._bindings == other_lemma._bindings # same bindings
         if ret:
             # TODO what if it is not a variable?
             if self.rest is not None: # therefore other_lemma.rest cannot be None either
@@ -137,8 +135,8 @@ class Lemma(object):
         return ret
     
     def __repr__(self):
-        b = self.__get_indented_list( self.bindings, 2 )
-        e = self.__get_indented_list( self.evidence_templates, 2 )
+        b = self.__get_indented_list( self._bindings, 2 )
+        e = self.__get_indented_list( self.evidence_lemmas, 2 )
         return "l(\n\trest:\n\t\t %s,\n\tbindings: %s,\n\tevidences: %s\n)" % (self.rest, b, e)
 
 
