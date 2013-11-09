@@ -3,9 +3,9 @@ Actuation using Triple Spaces
 
 This project implements a very basic scenario in three different ways to show:
 
- 1. How to change the smart environment using [RESTdesc](http://restdesc.org)
- 1. How to change the smart environment using a semantic shared space
- 1. Basic interoperation between the previous implementations
+ 1. How to change the smart environment using [RESTdesc](http://restdesc.org).
+ 1. How to change the smart environment using a semantic shared space.
+ 1. Basic interoperation between the previous implementations.
 
 
 Specifically, for the interoperation scenario, we wanted to exemplify how to seamlessly reuse an HTTP API from a space-aided consumer.
@@ -17,9 +17,15 @@ We only extended the space implementation.
 Installation
 ------------
 
-You will need to install the requirements specified by _requirements.txt_ in you python environment.
+After cloning this project, to complete its installation you will need to:
 
-    pip install -r requirements.txt
+ 1. Install the requirements specified by _requirements.txt_ in your python environment.
+
+        pip install -r requirements.txt
+
+ 2. Update the _eulerjar_ variable in _scripts/config.sh_ with your local _[EYE](http://eulersharp.sourceforge.net/) jar_ location.
+    
+    If you don't have _EYE_, you can [download it here](http://sourceforge.net/projects/eulersharp/files/eulersharp/).
 
 
 Basic usage
