@@ -15,23 +15,19 @@
 
 from optparse import OptionParser
 from actuation.proofs import Binding
-from rdflib import Graph, RDF, BNode
+from rdflib import BNode
 from actuation.proofs import Namespaces
 
 
 class BindingsParser(object):
     
-    def __init__(self, plan_file_path):        
-        self.bindings_by_lemma = {}
-        self._process_bindings( plan_file_path )
-    
-    def __extract_element(self, rdf_graph, subject, predicate):
+    def _extract_element(self, rdf_graph, subject, predicate):
         ret = rdf_graph.objects(subject, predicate).next()
         if ret is None:
             raise Exception( "The object for the predicate '%s' could not be extracted." % (predicate) )
         return ret
     
-    def __parse_variable(self, rdf_graph, binding_bnode):
+    def _parse_variable(self, rdf_graph, binding_bnode):
         # binding-bnode  tuple1 tuple2
         #           v     v  v   v
         # r:binding [ r:variable [ n3:uri "http://localhost/var#x0"]; ...
@@ -39,7 +35,7 @@ class BindingsParser(object):
         tuple2 = rdf_graph.triples((tuple1[2], None, None)).next()
         return tuple2[2]
         
-    def __parse_boundTo(self, rdf_graph, binding_bnode):
+    def _parse_boundTo(self, rdf_graph, binding_bnode):
         # binding-bnode     tuple1  tuple2 (bnode uri "http://")
         #           v        v  v    v
         # r:binding [ ...; r:boundTo [ n3:uri "http://example.org/lamp/obsv"]];
@@ -64,27 +60,20 @@ class BindingsParser(object):
             # r:binding [ ...; r:boundTo 19];
             return tuple1[2] # a Literal
     
-    def _process_bindings(self, plan_file_path):
-        rdf_graph = Graph()
-        rdf_graph.parse(plan_file_path, format="n3")
-        
-        for lemma,_,_  in rdf_graph.triples((None, RDF.type, Namespaces.REASON.Inference)):
-            lemma_id = str(lemma)
-            
-            if lemma_id not in self.bindings_by_lemma:
-                self.bindings_by_lemma[lemma_id] = []
-            
-            # r:binding [ r:variable [ n3:uri "http://localhost/var#x0"]; r:boundTo [ n3:uri "http://example.org/lamp/obsv"]];
-            for _,_,binding_bnode  in rdf_graph.triples((lemma, Namespaces.REASON.binding, None)):
-                var = self.__parse_variable(rdf_graph, binding_bnode)
-                boundTo = self.__parse_boundTo(rdf_graph, binding_bnode)
-                if boundTo is not None:
-                    self.bindings_by_lemma[lemma_id].append( Binding(var, boundTo) )
+    def parse_bindings(self, rdf_graph, lemma_node):
+        bindings = []
+        # r:binding [ r:variable [ n3:uri "http://localhost/var#x0"]; r:boundTo [ n3:uri "http://example.org/lamp/obsv"]];
+        for _,_,binding_bnode  in rdf_graph.triples((lemma_node, Namespaces.REASON.binding, None)):
+            var = self._parse_variable(rdf_graph, binding_bnode)
+            boundTo = self._parse_boundTo(rdf_graph, binding_bnode)
+            if boundTo is not None:
+                bindings.append( Binding(var, boundTo) )
+        return bindings
 
 
 if __name__ == '__main__':
     parser = OptionParser()
-    parser.add_option("-i", "--rest_input", dest="input", default="/tmp/tmpFj3f6D/partially_skolemized_plan.n3",
+    parser.add_option("-i", "--rest_input", dest="input", default="../../../files/partially_skolemized_plan.n3",
                       help="File to process")
     (options, args) = parser.parse_args()
     

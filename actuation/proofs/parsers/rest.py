@@ -14,48 +14,60 @@
 '''
 
 from optparse import OptionParser
-from rdflib import Graph
 from actuation.proofs import Namespaces
 from actuation.proofs import RESTCall
 
 
-# To be used with "services.txt"
-class RESTServicesParser(object):   
-    
-    def __init__(self, rest_file_path):        
-        self.calls = {}
-        self._process_rest_services( rest_file_path )
+class RESTServicesParser(object):
+
+    #===========================================================================
+    # ?rule r:gives {
+    #   ?expr => ?implication .
+    # }.
+    # ===========================================================================
+    def _get_rule_implication(self, rdf_graph, rule_bnode):
+        quote_graph = rdf_graph.triples((rule_bnode, Namespaces.REASON.gives, None)).next()[2]
+        return quote_graph.triples((None, Namespaces.LOG.implies, None)).next()[2]
+
+    def _get_rest(self, implication_graph):
+        ru = None
+        for t in implication_graph.triples((None, Namespaces.HTTP.requestURI, None)):
+            request_subject = t[0]
+            ru = t[2]
             
-    def _process_rest_services(self, rest_file_path):
-        rdf_graph = Graph()
-        rdf_graph.parse(rest_file_path, format="n3")
-        
-        for t in rdf_graph.triples((None, Namespaces.HTTP.request, None)):
-            rc = self._process_lemmas_rest(t[2])
-            self.calls[ str(t[0]) ] = rc
-    
-    def _process_lemmas_rest(self, lemma_rest):
-        for conclusion in lemma_rest.objects(None, Namespaces.LOG.implies):
-            request_subject = None
-            ru = None
-            for t in conclusion.triples((None, Namespaces.HTTP.requestURI, None)):
-                request_subject = t[0]
-                ru = t[2]
-                break
             m = None
-            for method_name in conclusion.objects(request_subject, Namespaces.HTTP.methodName):
+            for method_name in implication_graph.objects(request_subject, Namespaces.HTTP.methodName):
                 m = method_name
                 break
             b = None
-            for body in conclusion.objects(request_subject, Namespaces.HTTP.body):
+            for body in implication_graph.objects(request_subject, Namespaces.HTTP.body):
                 b = body
                 break
             return RESTCall(m, ru, b)
+        return None
+
+    #===========================================================================
+    # ?lemma a r:Inference ;
+    #     r:rule ?rule .
+    # ?rule r:gives {
+    #   ?expr => ?implication .
+    # }.
+    # 
+    # ?implication log:includes {
+    #     ?rest http:requestURI ?request_uri ;
+    #           http:methodName ?method ;
+    #           http:body ?body .
+    # } .
+    #===========================================================================
+    def parse_rest_services(self, rdf_graph, lemma_node):
+        for _,_,rule_bnode  in rdf_graph.triples((lemma_node, Namespaces.REASON.rule, None)):
+            implication_graph = self._get_rule_implication(rdf_graph, rule_bnode)
+            return self._get_rest(implication_graph)
 
 
 if __name__ == '__main__':
     parser = OptionParser()
-    parser.add_option("-i", "--rest_input", dest="input", default="../../../files/services.txt",
+    parser.add_option("-i", "--rest_input", dest="input", default="../../../files/partially_skolemized_plan.n3",
                       help="File to process")
     (options, args) = parser.parse_args()
     

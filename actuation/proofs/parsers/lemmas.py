@@ -14,7 +14,8 @@
 '''
 
 from optparse import OptionParser
-from actuation.proofs import Lemmas
+from rdflib import Graph, RDF
+from actuation.proofs import Lemmas, Namespaces
 from actuation.proofs.parsers.bindings import BindingsParser
 from actuation.proofs.parsers.rest import RESTServicesParser
 from actuation.proofs.parsers.evidence_templates import EvidenceTemplatesParser
@@ -30,16 +31,25 @@ class LemmasParser(object):
     """
     
     @staticmethod
+    def _parse_lemma( rdf_graph, lemmas ):
+        for lemma,_,_  in rdf_graph.triples((None, RDF.type, Namespaces.REASON.Inference)):            
+            bp = BindingsParser()
+            bindings = bp.parse_bindings(rdf_graph, lemma)
+            lemmas.add_bindings( lemma, bindings )
+            
+            rp = RESTServicesParser()
+            rest = rp.parse_rest_services(rdf_graph, lemma)
+            if rest is not None:
+                lemmas.add_rest_call( lemma, rest )
+    
+    
+    @staticmethod
     def parse_file( plan_file_path, rest_file_path, bindings_path, evidences_path):
         lemmas = Lemmas()
         
-        bp = BindingsParser( plan_file_path )
-        for lemma, bindings in bp.bindings_by_lemma.iteritems():
-            lemmas.add_bindings( lemma, bindings )
-            
-        rp = RESTServicesParser( rest_file_path )
-        for lemma, rest in rp.calls.iteritems():
-            lemmas.add_rest_call( lemma, rest )
+        rdf_graph = Graph()
+        rdf_graph.parse(plan_file_path, format="n3")
+        LemmasParser._parse_lemma(rdf_graph, lemmas)
             
         etp = EvidenceTemplatesParser( evidences_path )
         for lemma, templates in etp.templates_by_lemma.iteritems():
