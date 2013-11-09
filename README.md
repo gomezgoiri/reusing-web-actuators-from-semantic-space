@@ -43,21 +43,21 @@ Directories
 
 I encourage you to check the code and give me any interesting feedback you want ;-)
 
- * _actuation_ is the main module which contains the code for the implementations
-  * _api_ defines the APIs of the nodes used in the scenario
-  * _impl_ contains the implementations of the APIs
-  * _proofs_ contains all the classes which intermediate with [EYE](http://eulersharp.sourceforge.net/)
-   * ( this module is an updated version of the one developed for [this project](https://github.com/gomezgoiri/actuationInSpaceThroughRESTdesc) )
-  * _scenarios_ includes the basic entry points which define the scenarios at high level
-  * _utils_ contains utility functions and classes
- * _files_ has the resource descriptions, semantic files and queries
-  * _rest_ contains the files used in the first implementation
-  * _space_ contains the files used in the second implementation
-  * _mix_ contains the files which are specific to the third implementation
- * _otsopy_ has OtsoPy's data access layer
- * _scripts_ has the scripts which run the scenarios
-  * _config.sh_ is the file with the environment variables the user has to customize
- * _tests_ some unit tests
+ * _actuation_ is the main module which contains the code for the implementations.
+  * _api_ defines the APIs of the nodes used in the scenario.
+  * _impl_ contains the implementations of the APIs.
+  * _proofs_ contains all the classes which intermediate with [EYE](http://eulersharp.sourceforge.net/).
+   This module is an updated version of the one developed for [this project](https://github.com/gomezgoiri/actuationInSpaceThroughRESTdesc).
+  * _scenarios_ includes the basic entry points which define the scenarios at high level.
+  * _utils_ contains utility functions and classes.
+ * _files_ has the resource descriptions, semantic files and queries.
+  * _rest_ contains the files used in the first implementation.
+  * _space_ contains the files used in the second implementation.
+  * _mix_ contains the files which are specific to the third implementation.
+ * _otsopy_ has OtsoPy's data access layer.
+ * _scripts_ has the scripts which run the scenarios.
+  * _config.sh_ is the file with the environment variables the user has to customize.
+ * _tests_ some unit tests.
 
 
 License
