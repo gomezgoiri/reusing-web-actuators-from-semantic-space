@@ -45,8 +45,12 @@ class LemmaGraphFactory(object):
         This method creates a graph with the steps needed to achieve a goal.
         """
         plan_filepath = self._create_plan(query_goal_path, all_knowledge )
+        skolemized_plan_filepath = Preprocessor._skolemize_lemmas_and_write( plan_filepath, self.output_folder )
+        
+        # final goal: to avoid/remove this
         Preprocessor.preprocess( plan_filepath, self.output_folder, self.reasoner )
-        lemmas = LemmasParser.parse_file( self.output_folder + Preprocessor.get_output_filename("services"),
+        lemmas = LemmasParser.parse_file( skolemized_plan_filepath,
+                                          self.output_folder + Preprocessor.get_output_filename("services"),
                                           self.output_folder + Preprocessor.get_output_filename("bindings"),
                                           self.output_folder + Preprocessor.get_output_filename("evidences") )
         return LemmaPrecedencesGraph( self.output_folder + Preprocessor.get_output_filename("precedences"),

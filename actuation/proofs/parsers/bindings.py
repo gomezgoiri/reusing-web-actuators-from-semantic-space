@@ -15,44 +15,15 @@
 
 from optparse import OptionParser
 from actuation.proofs import Binding
-from rdflib import Graph, RDF
+from rdflib import Graph, RDF, BNode
 from actuation.proofs import Namespaces
 
 
-# Two examples of the possible shape of a binding:
-# + Example 1: ?x0 must be bound to an URI
-#     fake:lemma2 r:binding _:sk6.
-#     _:sk6 r:var "http://localhost/var#x0".
-#     _:sk6 r:boundType n3:uri.
-#     _:sk6 r:bound "http://example.org/lamp/obsv".
-#     _:sk6 r:bound2 _:e23.
-# + Example 2: ?x1 must be bound to a number (19)
-#     fake:lemma2 r:binding _:sk7.
-#     _:sk7 r:var "http://localhost/var#x1".
-#     _:sk7 r:boundType <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>.
-#     _:sk7 r:bound e:Numeral.
-#     _:sk7 r:bound2 19 .
-
-
-# Uninteresting cases for us (yet they need to be carefully analyzed):
-# + Case 1:
-#     fake:lemma1 r:binding _:sk2.
-#     _:sk2 r:var "http://localhost/var#x1".
-#     _:sk2 r:boundType <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>.
-#     _:sk2 r:bound r:Existential.
-#     _:sk2 r:bound2 _:e7.
-# + Case 2:
-#     fake:lemma1 r:binding _:sk3.
-#     _:sk3 r:var "http://localhost/var#x1".
-#     _:sk3 r:boundType n3:nodeId.
-#     _:sk3 r:bound "_:sk3".
-#     _:sk3 r:bound2 _:e7.
-
 class BindingsParser(object):
     
-    def __init__(self, bindings_path):        
+    def __init__(self, plan_file_path):        
         self.bindings_by_lemma = {}
-        self._process_bindings( bindings_path )
+        self._process_bindings( plan_file_path )
     
     def __extract_element(self, rdf_graph, subject, predicate):
         ret = rdf_graph.objects(subject, predicate).next()
@@ -60,40 +31,60 @@ class BindingsParser(object):
             raise Exception( "The object for the predicate '%s' could not be extracted." % (predicate) )
         return ret
     
-    def _process_bindings(self, bindings_file_path):
-        rdf_graph = Graph()
-        rdf_graph.parse(bindings_file_path, format="n3")
+    def __parse_variable(self, rdf_graph, binding_bnode):
+        # binding-bnode  tuple1 tuple2
+        #           v     v  v   v
+        # r:binding [ r:variable [ n3:uri "http://localhost/var#x0"]; ...
+        tuple1 = rdf_graph.triples((binding_bnode, Namespaces.REASON.variable, None)).next()
+        tuple2 = rdf_graph.triples((tuple1[2], None, None)).next()
+        return tuple2[2]
         
-        for lemma,_,binding  in rdf_graph.triples((None, Namespaces.REASON.binding, None)):
+    def __parse_boundTo(self, rdf_graph, binding_bnode):
+        # binding-bnode     tuple1  tuple2 (bnode uri "http://")
+        #           v        v  v    v
+        # r:binding [ ...; r:boundTo [ n3:uri "http://example.org/lamp/obsv"]];
+        #
+        # binding-bnode     tuple1
+        #           v        v  v 
+        # r:binding [ ...; r:boundTo 19];
+        tuple1 = rdf_graph.triples((binding_bnode, Namespaces.REASON.boundTo, None)).next()
+        
+        if isinstance(tuple1[2], BNode):
+            # r:binding [ ...; r:boundTo [ n3:uri "http://example.org/lamp/obsv"]];
+            tuple2 = rdf_graph.triples((tuple1[2], None, None)).next()
+            if tuple2[1] == Namespaces.N3.uri:
+                # r:binding [ ...; r:boundTo [ n3:uri "http://example.org/lamp/obsv"]];
+                return tuple2[2]
+            else:
+                #raise Exception( "TODO. Not considered case: %s" % (boundType) )
+                # For example:
+                # r:binding [ ...; r:boundTo [ a r:Existential; n3:nodeId "_:sk3"]];
+                pass
+        else:
+            # r:binding [ ...; r:boundTo 19];
+            return tuple1[2] # a Literal
+    
+    def _process_bindings(self, plan_file_path):
+        rdf_graph = Graph()
+        rdf_graph.parse(plan_file_path, format="n3")
+        
+        for lemma,_,_  in rdf_graph.triples((None, RDF.type, Namespaces.REASON.Inference)):
             lemma_id = str(lemma)
             
             if lemma_id not in self.bindings_by_lemma:
                 self.bindings_by_lemma[lemma_id] = []
             
-            var = self.__extract_element(rdf_graph, binding, Namespaces.REASON.var)
-            boundType = self.__extract_element(rdf_graph, binding, Namespaces.REASON.boundType)
-            bound = self.__extract_element(rdf_graph, binding, Namespaces.REASON.bound)
-            
-            if boundType == Namespaces.N3.uri:
-                self.bindings_by_lemma[lemma_id].append( Binding(var, bound) )
-            
-            elif boundType == RDF.type:
-                if bound == Namespaces.E.Numeral:
-                    number = self.__extract_element(rdf_graph, binding, Namespaces.REASON.bound2)
-                    # type(number) is already a Literal
-                    self.bindings_by_lemma[lemma_id].append( Binding(var, number) )
-                else:
-                    #raise Exception( "TODO. Not considered datatype: %s" % (bound) )
-                    pass
-            else:
-                #raise Exception( "TODO. Not considered case: %s" % (boundType) )
-                pass
-
+            # r:binding [ r:variable [ n3:uri "http://localhost/var#x0"]; r:boundTo [ n3:uri "http://example.org/lamp/obsv"]];
+            for _,_,binding_bnode  in rdf_graph.triples((lemma, Namespaces.REASON.binding, None)):
+                var = self.__parse_variable(rdf_graph, binding_bnode)
+                boundTo = self.__parse_boundTo(rdf_graph, binding_bnode)
+                if boundTo is not None:
+                    self.bindings_by_lemma[lemma_id].append( Binding(var, boundTo) )
 
 
 if __name__ == '__main__':
     parser = OptionParser()
-    parser.add_option("-i", "--rest_input", dest="input", default="../../../files/bindings.txt",
+    parser.add_option("-i", "--rest_input", dest="input", default="/tmp/tmpFj3f6D/partially_skolemized_plan.n3",
                       help="File to process")
     (options, args) = parser.parse_args()
     

@@ -30,10 +30,10 @@ class LemmasParser(object):
     """
     
     @staticmethod
-    def parse_file( rest_file_path, bindings_path, evidences_path):
+    def parse_file( plan_file_path, rest_file_path, bindings_path, evidences_path):
         lemmas = Lemmas()
         
-        bp = BindingsParser( bindings_path ) 
+        bp = BindingsParser( plan_file_path )
         for lemma, bindings in bp.bindings_by_lemma.iteritems():
             lemmas.add_bindings( lemma, bindings )
             
