@@ -22,6 +22,10 @@ After cloning this project, to complete its installation you will need to:
 
         pip install -r requirements.txt
 
+   * You might experience [an error installing _matplotlib_ and _numpy_ at the same time](http://stackoverflow.com/questions/19119042/pip-dependency-resolution-fails-when-install-both-numpy-and-matplotlib). If so, run the following command before re-executing the previous one.
+
+        pip install pip install numpy==1.7.1
+        
  2. Update the _eulerjar_ variable in _scripts/config.sh_ with your local _[EYE](http://eulersharp.sourceforge.net/) jar_ location.
     
     If you don't have _EYE_, you can [download it here](http://sourceforge.net/projects/eulersharp/files/eulersharp/).
