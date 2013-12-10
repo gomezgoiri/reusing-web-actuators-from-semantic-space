@@ -10,8 +10,8 @@ This project implements a very basic scenario in three different ways to show:
 
 Specifically, for the interoperation scenario, we wanted to exemplify how to seamlessly reuse an HTTP API from a space-aided consumer.
 In other words, the consumer still writes _tasks_ into the space, which automatically consumes any needed HTTP API on its behalf.
-To check that the interoperation is possible, we completely reuse first scenario's provider and second scenario's consumer.
-We only extended the space implementation.
+To check that the interoperation is feasible, we completely reuse first scenario's provider and second scenario's consumer.
+We only extend the space implementation.
 
 
 Installation
@@ -41,7 +41,7 @@ To run each of the scenario's implementations, go to the _scripts_ folder and ru
 Directories
 -----------
 
-I encourage you to check the code and give me any interesting feedback you want ;-)
+Feel free to check the code and give me any interesting feedback you want ;-)
 
  * _actuation_ is the main module which contains the code for the implementations.
   * _api_ defines the APIs of the nodes used in the scenario.
