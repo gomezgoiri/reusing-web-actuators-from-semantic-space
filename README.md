@@ -1,5 +1,5 @@
-Actuation using Triple Spaces
-=============================
+Reusing Web-enabled Actuators from Semantic Space-based Perspective
+===================================================================
 
 This project implements a basic scenario in three different ways to show:
 
