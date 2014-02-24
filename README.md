@@ -1,10 +1,10 @@
-Reusing Web-enabled Actuators from Semantic Space-based Perspective
-===================================================================
+Reusing Web Actuators from a Semantic Space
+===========================================
 
 This project implements a basic scenario in three different ways to show:
 
- 1. How to change the smart environment using [RESTdesc](http://restdesc.org).
- 1. How to change the smart environment using a semantic shared space.
+ 1. How to change a smart environment using [RESTdesc](http://restdesc.org).
+ 1. How to change a smart environment using a semantic shared space.
  1. How to make the second implementation interoperate with the first one.
 
 Therefore, the goal of the third implementation is to exemplify how to seamlessly reuse an HTTP API from a space-aided consumer.
