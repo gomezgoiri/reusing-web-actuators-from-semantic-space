@@ -1,0 +1,15 @@
+prefix : <http://example.org/lamp/>
+prefix sweet:  <http://sweet.jpl.nasa.gov/>
+prefix frap: <http://purl.org/frap/>
+prefix dul:  <http://www.loa.istc.cnr.it/ontologies/DUL.owl#>
+prefix ssn:  <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#>
+prefix ucum:  <http://purl.oclc.org/NET/muo/ucum/unit/temperature/>
+prefix actuators:  <http://example.org/lamp/actuators/>
+
+
+select ?value where {
+	?observation a frap:Preference ;
+	      a ssn:ObservationValue ;
+	      dul:isClassifiedBy  ucum:degree-Celsius ;
+	      dul:hasDataValue ?value .
+}
