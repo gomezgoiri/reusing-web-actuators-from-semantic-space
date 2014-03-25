@@ -23,8 +23,9 @@ class RESTRequests(object):
 
 class SpaceRequests(object):
     
-    def __init__(self, num_nodes_list):
+    def __init__(self, num_nodes_list, written_graphs_per_provider):
         self.num_nodes_list = num_nodes_list
+        self.written_graphs_per_provider = written_graphs_per_provider
         # self.nodes_involved = 2
         self.requests_to_activate = {}
         self.requests_to_activate['per_consumer'] = 3 # write task, subscribe to result, read result 
@@ -34,7 +35,8 @@ class SpaceRequests(object):
     def get_requests(self):
         ret = []
         for num_nodes in self.num_nodes_list:
-            total = num_nodes * 1 # subscribe to task
+            total = num_nodes * (1 + self.written_graphs_per_provider) # subscribe to task
+            # TODO actually, the nodes write their content into the space too
             for val in self.requests_to_activate.values():
                 total += val
             ret.append(total)
@@ -47,8 +49,11 @@ if __name__ == '__main__':
     
     rest = RESTRequests( rng,
                         10, # One for each OPTIONS and GET verb of each resource
+                            # Anyway, this can be improved redesigning the API
                         2 ) # The actuation in our scenario is composed by two requests
-    space = SpaceRequests( rng )
+    space = SpaceRequests( rng,
+                           2 )  # In our scenario, the provider writes 2 graphs: lamp description, bulb light description
+                                # But this depends
     
     data = {}
     data['rest'] = {}

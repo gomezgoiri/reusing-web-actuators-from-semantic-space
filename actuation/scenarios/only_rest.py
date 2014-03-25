@@ -22,7 +22,7 @@ from actuation.impl.rest.mock.discovery import MockDiscovery
 
 class OnlyRESTDevicesSimulator(AbstractSimulation):
     
-    def __init__(self, input_folder, output_folder, path_to_reasoner):
+    def __init__(self, input_folder, output_folder, path_to_reasoner, num_providers, debug = False):
         super(OnlyRESTDevicesSimulator, self).__init__( output_folder )
         self.input_folder = input_folder
         self.reasoner = EulerReasoner( path_to_reasoner )

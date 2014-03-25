@@ -68,6 +68,8 @@ class AbstractSimulation(object):
 
 def main( simulation_subclass ):
     parser = OptionParser()
+    parser.add_option("-n", "--numProvs", dest="providers", type="int", default=1,
+                      help="Number of providers which exist in the scenario tested.")
     parser.add_option("-i", "--input", dest="input",
                       help="Base directory where all the files used in the simulation are stored.")
     parser.add_option("-o", "--output", dest="output", default="/tmp",
@@ -76,12 +78,16 @@ def main( simulation_subclass ):
                       help = "Path to the Euler jar (e.g. '../Euler.jar')")
     parser.add_option("-c", "--clean", dest = "clean", default="True",
                       help = "Specifies whether the output directory should be clean after the execution.")
+    parser.add_option("-d", "--debug", dest = "debug", default="True",
+                      help = "Generate messages and files to check afterwards.")
     options, _ = parser.parse_args()
     
     sim = simulation_subclass( append_slash_if_absent( options.input ),
                             append_slash_if_absent( options.output ),
                             # optional, not all the simulations will have it!
-                            options.euler ) # we do not expect a path there anymore
+                            options.euler, # we do not expect a path there anymore
+                            options.providers,
+                            options.debug )
                             #None if options.euler is None else append_slash_if_absent( options.euler ) )
     
     sim.run()
