@@ -13,7 +13,7 @@
  @author: Aitor Gómez Goiri <aitor.gomez@deusto.es>
 '''
 
-from actuation.proofs.reason import EulerReasoner
+from actuation.proofs.reason import EyeReasoner
 from actuation.scenarios.abstract import AbstractSimulation, main
 from actuation.impl.space import CoordinationSpace
 from actuation.impl.rest.lamp.provider import LampProviderRESTMock
@@ -27,7 +27,7 @@ class OnlySpaceBasedDevicesSimulator(AbstractSimulation):
     def __init__(self, input_folder, output_folder, path_to_reasoner, num_providers, debug = False):
         super(OnlySpaceBasedDevicesSimulator, self).__init__( output_folder )
         self.input_folder = input_folder
-        self.reasoner = EulerReasoner( path_to_reasoner )
+        self.reasoner = EyeReasoner( path_to_reasoner )
     
     @property    
     def lc(self):

@@ -26,7 +26,7 @@ After cloning this project, to complete its installation you will need to:
 
             pip install pip install numpy==1.7.1
         
- 2. Update the _eulerjar_ variable in _scripts/config.sh_ with your local _[EYE](http://eulersharp.sourceforge.net/) jar_ location.
+ 2. Update the _eyebin_ variable in _scripts/config.sh_ with your local _[EYE](http://eulersharp.sourceforge.net/) jar_ location.
     
     If you don't have _EYE_, you can [download it here](http://sourceforge.net/projects/eulersharp/files/eulersharp/).
 

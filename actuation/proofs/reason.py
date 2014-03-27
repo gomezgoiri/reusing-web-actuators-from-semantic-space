@@ -15,25 +15,25 @@
 
 import subprocess
 
-class EulerReasoner(object):
+class EyeReasoner(object):
     '''
-    Gateway to call to euler/EYE resoner
+    Gateway to call to EYE resoner
     '''
     
-    def __init__( self, euler_path ):
+    def __init__( self, eye_path ):
         '''
-            @param euler_path: Path to the Euler jar (e.g. 'path/Euler.jar')
+            @param eye_path: Path to the EYE (e.g. '/opt/eye/bin/eye.sh')
         '''
-        self.euler_path = euler_path
+        self.eye_path = eye_path
     
     def _generic_query( self, input_files, query_file, optional_args, output_file_path = None ):
         '''
         This method invokes Euler (EYE) in the following way:
         
-        java -jar [Euler-jar] [optional_args] [input_files] --query [goal_file] 
+        [eye-sh] [optional_args] [input_files] --query [goal_file] 
         '''
         
-        call = ['java', '-jar', self.euler_path]
+        call = [self.eye_path]
         call += optional_args
         
         if isinstance(input_files, (list, tuple, set)):
@@ -56,14 +56,14 @@ class EulerReasoner(object):
     
     def query( self, input_files, query_file, output_file_path = None  ):
         '''
-        This method invokes Euler (EYE) in the following way:
+        This method invokes EYE in the following way:
         
-        java -jar [Euler-jar] --nope [input_files] --query [goal_file] 
+        [eye-sh] --nope [input_files] --query [goal_file] 
         
         
         Or, if output_file_path is provided:
         
-        java -jar [Euler-jar] --nope [input_files] --query [goal_file] > [output_file]
+        [eye-sh] --nope [input_files] --query [goal_file] > [output_file]
         '''
         return self._generic_query( input_files, query_file, ["--nope",], output_file_path )
     
@@ -72,6 +72,6 @@ class EulerReasoner(object):
         '''
         This method invokes Euler (EYE) in the following way:
         
-        java -jar [Euler-jar] [input_files] --query [goal_file] 
+        [eye-sh] [input_files] --query [goal_file]
         '''        
         return self._generic_query( input_files, query_file, [], output_file_path )        

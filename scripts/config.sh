@@ -2,7 +2,7 @@
 
 # Configure the following paths
 export pyprojectpath=".."
-export eulerjar="../lib/Euler.jar"
+export eyebin="/opt/eye/bin/eye.sh"
 export filespath="../files"
 
 

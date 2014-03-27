@@ -13,7 +13,7 @@
  @author: Aitor Gómez Goiri <aitor.gomez@deusto.es>
 '''
 
-from actuation.proofs.reason import EulerReasoner
+from actuation.proofs.reason import EyeReasoner
 from actuation.scenarios.abstract import AbstractSimulation, main
 from actuation.impl.rest.lamp.provider import LampProviderRESTMock
 from actuation.impl.rest.lamp.consumer import LampConsumerRESTMock
@@ -25,7 +25,9 @@ class OnlyRESTDevicesSimulator(AbstractSimulation):
     def __init__(self, input_folder, output_folder, path_to_reasoner, num_providers, debug = False):
         super(OnlyRESTDevicesSimulator, self).__init__( output_folder )
         self.input_folder = input_folder
-        self.reasoner = EulerReasoner( path_to_reasoner )
+        self.reasoner = EyeReasoner( path_to_reasoner )
+        self.number_of_providers = num_providers
+        self._debug = debug
     
     @property    
     def lc(self):
