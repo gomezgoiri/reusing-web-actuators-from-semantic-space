@@ -13,11 +13,15 @@
  @author: Aitor Gómez Goiri <aitor.gomez@deusto.es>
 '''
 
-from tempfile import mkdtemp
+from tempfile import mkdtemp, mkstemp
+from jinja2 import Template
+from StringIO import StringIO
+from rdflib import Graph
 from shutil import rmtree
 from optparse import OptionParser
 from abc import ABCMeta, abstractmethod
 from actuation.utils.files import append_slash_if_absent
+
 
 class AbstractSimulation(object):
     
@@ -64,6 +68,29 @@ class AbstractSimulation(object):
     
     def clean(self):
         rmtree( self.output_folder )
+        
+    def _create_benchmarking_content(self, tpl_fp, num_providers):
+        if num_providers>0:
+            with open( tpl_fp, "r" ) as input_file:
+                template = Template( input_file.read() )
+                outc = template.render( heater_names = ["domain%d"%i for i in range(num_providers)] )
+                return outc
+    
+    def _create_benchmarking_file(self, outstring):
+        if outstring is not None:
+            _, ret_filepath = mkstemp( dir=self.output_folder, suffix=".n3" )
+            with open( ret_filepath, "w" ) as output_file:
+                output_file.write( outstring ) # to check their validity afterwards
+                return ret_filepath
+    
+    def _get_additional_knowledge_graph(self, tpl_fp, num_providers):
+        if num_providers>0:
+            outc = self._create_benchmarking_content(tpl_fp, num_providers)
+            if self._debug:
+                self._create_benchmarking_file(outc)
+            ret = Graph()
+            ret.parse( StringIO(outc), format="n3" )
+            return ret
 
 
 def main( simulation_subclass ):

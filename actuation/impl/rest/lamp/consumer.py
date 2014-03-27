@@ -23,7 +23,8 @@ class LampConsumerRESTMock(Node):
     def __init__(self, input_folder, output_folder, reasoner, discovery):
         super(LampConsumerRESTMock,self).__init__()
         self._discovery = discovery
-        self._uncrawled_kb = input_folder + "additional_info.n3"
+        self._uncrawled_kb = set() # list -> just in case new files are added (e.g. for the evaluation)
+        self._uncrawled_kb.add( input_folder + "additional_info.n3" )
         
         self.crawler = Crawler( discovery )
         self.lgraph_factory = PlanFactory( output_folder, reasoner )
@@ -36,7 +37,7 @@ class LampConsumerRESTMock(Node):
     
     def achieve_goal(self, query_goal_path):
         all_knowledge = self.crawler.descriptions.union( self.crawler.base_knowledge )
-        all_knowledge.add( self._uncrawled_kb )
+        all_knowledge = all_knowledge.union( self._uncrawled_kb )
         
         lgraph = self.lgraph_factory.create(query_goal_path, all_knowledge)
         pa = PlanAchiever( lgraph, self._discovery )

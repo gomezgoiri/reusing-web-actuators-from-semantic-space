@@ -52,10 +52,19 @@ class OnlyRESTDevicesSimulator(AbstractSimulation):
         discovery.add_discovered( self.lp, "example.org")
         #print self.lp.get_resource("/lamp/light").get()
     
+    def add_more_knowledge_discovered_data(self):
+        outc = self._create_benchmarking_content( self.input_folder + "eval/additional.n3.tpl", self.number_of_providers-1 )
+        if outc is not None:
+            self.lc._uncrawled_kb.add( self._create_benchmarking_file(outc) )
+    
     def execute(self):
         '''
         Executes the scenario where the consumer tries to change the light in the environment.
         '''
+        # In theory, this should be add during the crawling process (triggered by the provider.start() method).
+        # In reality, as we only need it for the performance evaluation, we directly add it here (which is faster and has the same effects :-D).
+        self.add_more_knowledge_discovered_data()
+        
         # we could make this goal a template also
         self.lc.achieve_goal( self.input_folder + "light_goal.n3" )
     
