@@ -13,6 +13,8 @@
  @author: Aitor Gómez Goiri <aitor.gomez@deusto.es>
 '''
 
+import os
+from time import time
 from tempfile import mkdtemp, mkstemp
 from jinja2 import Template
 from StringIO import StringIO
@@ -31,6 +33,7 @@ class AbstractSimulation(object):
     def __init__(self, output_folder):
         self.nodes = {}
         self.output_folder = mkdtemp( dir = output_folder ) + "/"
+        self.execution_time = None
     
     # new possible phase
     # def initialize(self):  
@@ -38,21 +41,27 @@ class AbstractSimulation(object):
     def run(self):
         '''
         Runs the scenario where the consumer tries to change the light in the environment.
-        '''
+        '''        
+        start = time()
+        
         self.configure()
         
         for node in self.nodes.itervalues():
             node.start()
         
+        self.starting_time = time() - start # elapsed
+        
+        start = time()
         self.execute()
+        self.execution_time = time() - start # elapsed
         
         for node in self.nodes.itervalues():
             node.stop()
         
         if self.check():
-            print "The scenario behaved as expected."
+            print "The scenario behaved as expected (%d s)." % (self.execution_time)
         else:
-            print "The scenario didn't run as expected."
+            print "The scenario didn't run as expected (%d s)." % (self.execution_time)
     
     @abstractmethod
     def configure(self):
@@ -68,7 +77,13 @@ class AbstractSimulation(object):
     
     def clean(self):
         rmtree( self.output_folder )
-        
+    
+    def _create_benchmarking_content_for_a_provider(self, tpl_fp, provider_number):
+        with open( tpl_fp, "r" ) as input_file:
+            template = Template( input_file.read() )
+            outc = template.render( heater_names = ["domain%d"%provider_number] )
+            return outc
+    
     def _create_benchmarking_content(self, tpl_fp, num_providers):
         if num_providers>0:
             with open( tpl_fp, "r" ) as input_file:
@@ -78,10 +93,11 @@ class AbstractSimulation(object):
     
     def _create_benchmarking_file(self, outstring):
         if outstring is not None:
-            _, ret_filepath = mkstemp( dir=self.output_folder, suffix=".n3" )
-            with open( ret_filepath, "w" ) as output_file:
+            testfd, ret_filepath = mkstemp( dir=self.output_folder, suffix=".n3" )
+            #with open( ret_filepath, "w" ) as output_file: ## with this, testfd would still need to be closed!
+            with os.fdopen(testfd,'w') as output_file: ## need to close file handles
                 output_file.write( outstring ) # to check their validity afterwards
-                return ret_filepath
+            return ret_filepath
     
     def _get_additional_knowledge_graph(self, tpl_fp, num_providers):
         if num_providers>0:
@@ -101,8 +117,8 @@ def main( simulation_subclass ):
                       help="Base directory where all the files used in the simulation are stored.")
     parser.add_option("-o", "--output", dest="output", default="/tmp",
                       help="Output folder where the processed results will be written.")
-    parser.add_option("-e", "--euler", dest = "euler", default=None,
-                      help = "Path to the Euler jar (e.g. '../Euler.jar')")
+    parser.add_option("-e", "--euler", dest = "euler", default="/opt/eye/bin/eye.sh",
+                      help = "Path to the EYE reasoner. E.g., '/opt/eye/bin/eye.sh'.")
     parser.add_option("-c", "--clean", dest = "clean", default="True",
                       help = "Specifies whether the output directory should be clean after the execution.")
     parser.add_option("-d", "--debug", dest = "debug", default="True",

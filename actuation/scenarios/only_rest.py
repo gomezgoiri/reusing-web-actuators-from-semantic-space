@@ -57,6 +57,12 @@ class OnlyRESTDevicesSimulator(AbstractSimulation):
         if outc is not None:
             self.lc._uncrawled_kb.add( self._create_benchmarking_file(outc) )
     
+    def add_more_knowledge_discovered_data_one_file_per_provider(self):
+        for provider_number in range(self.number_of_providers-1):
+            outc = self._create_benchmarking_content_for_a_provider( self.input_folder + "eval/additional.n3.tpl", provider_number )
+            if outc is not None:
+                self.lc._uncrawled_kb.add( self._create_benchmarking_file(outc) )
+    
     def execute(self):
         '''
         Executes the scenario where the consumer tries to change the light in the environment.
