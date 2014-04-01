@@ -26,7 +26,7 @@ class EyeReasoner(object):
         '''
         self.eye_path = eye_path
     
-    def _generic_query( self, input_files, query_file, optional_args, output_file_path = None ):
+    def _generic_query( self, input_files, query_file, optional_args, output_file_path = None):
         '''
         This method invokes Euler (EYE) in the following way:
         
@@ -54,7 +54,7 @@ class EyeReasoner(object):
                 return output_file_path
             raise Exception("The plan could not be created.")
     
-    def query( self, input_files, query_file, output_file_path = None  ):
+    def query( self, input_files, query_file, output_file_path = None, quick = False  ):
         '''
         This method invokes EYE in the following way:
         
@@ -65,10 +65,12 @@ class EyeReasoner(object):
         
         [eye-sh] --nope [input_files] --query [goal_file] > [output_file]
         '''
-        return self._generic_query( input_files, query_file, ["--nope",], output_file_path )
+        optional_args = ["--nope"]
+        if quick: optional_args.append("--quick-answer")
+        return self._generic_query( input_files, query_file, optional_args, output_file_path )
     
     
-    def query_proofs( self, input_files, query_file, output_file_path = None ):
+    def query_proofs( self, input_files, query_file, output_file_path = None, quick = False ):
         '''
         This method invokes Euler (EYE) in the following way:
         
