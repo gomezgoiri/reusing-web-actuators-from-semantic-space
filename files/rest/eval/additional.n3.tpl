@@ -13,6 +13,7 @@
 @prefix {{ heater_name }}: <http://{{ heater_name }}.net/hvac>.
 @prefix {{ heater_name }}act:  <http://{{ heater_name }}.net/hvac/actuators/> .
 @prefix {{ heater_name }}meas: <http://{{ heater_name }}.net/hvac/actuators/heater/>. # TODO also redirect to the last one
+@prefix {{ heater_name }}measzero: <http://{{ heater_name }}.net/hvac/actuators/heater/zero>.
 {% endfor %}
 
 
@@ -26,7 +27,7 @@
   ssn:observes sweet:Temperature ; # In quanTemperature.owl
   ssn:onPlatform {{ heater_name }}:hvac .
   {# simplification: just one "measure" #}
-  {{ heater_name }}act:heater ssn:madeObservation {{ heater_name }}meas:0 .
+  {{ heater_name }}act:heater ssn:madeObservation {{ heater_name }}meas:zero .
 
 {# sth/hvac/actuators/heater -> POST #}
 {
@@ -78,15 +79,15 @@
       dul:hasDataValue _:val .
 }.
 
-# sth/hvac/actuators/heater/measureX -> GET
-{{ heater_name }}meas:0 a ssn:Observation ;
+# sth/hvac/actuators/heater/measure/zero -> GET
+{{ heater_name }}meas:zero a ssn:Observation ;
 				ssn:observedProperty  sweet:Light ;
 				ssn:observedBy {{ heater_name }}act:light ; # redundant madeObservation
-				ssn:observationResult {{ heater_name }}meas:or .
+				ssn:observationResult {{ heater_name }}measzero:or .
 
-{{ heater_name }}meas:or ssn:hasValue {{ heater_name }}meas:ov .
+{{ heater_name }}measzero:or ssn:hasValue {{ heater_name }}measzero:ov .
 
-{{ heater_name }}meas:ov a ssn:ObservationValue ;
+{{ heater_name }}measzero:ov a ssn:ObservationValue ;
     	   dul:isClassifiedBy  ucum:kelvin ;
     	   {# Any value, will never be used in the scenario. #}
            dul:hasDataValue 280 .
