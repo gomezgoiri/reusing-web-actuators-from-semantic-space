@@ -55,8 +55,9 @@ class OnlySpaceBasedDevicesSimulator(AbstractSimulation):
         graph = self._get_additional_knowledge_graph( self.input_folder + "eval/additional.n3.tpl", self.number_of_providers-1 )
         if graph is not None:
             self.space.write( graph )
+        subscription_for_replicas =  self._get_subscriptions( self.input_folder + "eval/task_subscription.sparql" )
         for _ in range(self.number_of_providers-1):
-            self.space.subscribe( self._get_subscriptions( self.input_folder + "eval/task_subscription.sparql" ), None ) # will not be activated
+            self.space.subscribe( subscription_for_replicas , None ) # will not be activated, so callback==None
     
     def configure(self):
         self.space = CoordinationSpace("onlySpace")
