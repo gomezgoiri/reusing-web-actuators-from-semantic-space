@@ -13,6 +13,7 @@
  @author: Aitor Gómez Goiri <aitor.gomez@deusto.es>
 '''
 
+import json
 from optparse import OptionParser
 from actuation.eval.charts.diagram import DiagramGenerator
 from actuation.scenarios.only_rest import OnlyRESTDevicesSimulator
@@ -50,7 +51,7 @@ class PerformanceChecker(object):
             self.time_measures.append(time_needed)
             
     
-    def get_summary(self):
+    def get_results(self):
         data = {}
         data['num_nodes'] = self.range_providers
         data['requests'] = self.time_measures
@@ -101,10 +102,15 @@ if __name__ == '__main__':
     
     data = {}
     data['rest'] = {}
-    data['rest'] = simRest.get_summary()
+    data['rest'] = simRest.get_results()
     data['space'] = {}
-    data['space'] = simSpace.get_summary();
+    data['space'] = simSpace.get_results();
     
-    print data
-    d = DiagramGenerator("Performance of two of the strategies as it varies with the scale", data)
-    d.save('/tmp/performance_by_strategies.pdf')
+    # Write results in Json format
+    ofilename = output + "results.json"
+    with open(ofilename, "w") as ofile:
+        ofile.write( json.dumps( data ) )
+        
+    #print data
+    #d = DiagramGenerator("Performance of two of the strategies as it varies with the scale", data)
+    #d.save('/tmp/performance_by_strategies.pdf')

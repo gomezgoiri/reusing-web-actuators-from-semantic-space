@@ -122,12 +122,10 @@ def mainTest():
     d.save('/tmp/test_diagram.pdf')
 
 def main():    
-    f = open('/tmp/requests_by_strategies.json', 'r')
-    json_txt = f.read()
-    f.close()
-    
-    d = DiagramGenerator("Network usage by strategies", eval(json_txt))
-    d.save('/tmp/requests_by_strategies.svg')
+    with open('/tmp/results.json', 'r') as finput:
+        json_txt = finput.read()
+        d = DiagramGenerator("Network usage by strategies", eval(json_txt))
+        d.save('/tmp/requests_by_strategies.svg')
 
 
 if __name__ == '__main__':   
