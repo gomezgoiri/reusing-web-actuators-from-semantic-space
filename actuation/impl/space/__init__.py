@@ -29,14 +29,15 @@ class CoordinationSpace(Space):
         self._subscriptions = [] # tuple: (subscription template, callback, level)
         self._observers = []
     
-    def write(self, triples):
+    def write(self, triples, ignore_subscriptions = False):
         ret = self._da.write(triples)
         
-        # TODO do it in another thread!
-        activated = self._get_activated_subscriptions( triples )
-        if activated:
-            for ac in activated:
-                ac.call()
+        if not ignore_subscriptions: # only used to shorten the evaluation initialization process
+            # TODO do it in another thread!
+            activated = self._get_activated_subscriptions( triples )
+            if activated:
+                for ac in activated:
+                    ac.call()
         
         return ret
     

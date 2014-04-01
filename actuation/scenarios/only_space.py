@@ -54,7 +54,9 @@ class OnlySpaceBasedDevicesSimulator(AbstractSimulation):
         # load triples
         graph = self._get_additional_knowledge_graph( self.input_folder + "eval/additional.n3.tpl", self.number_of_providers-1 )
         if graph is not None:
-            self.space.write( graph )
+            # I know for sure that no subscription will be activated with this graph,
+            # so I've opted for making this loading phase which is not measured quicker...
+            self.space.write( graph, ignore_subscriptions = True )
         subscription_for_replicas =  self._get_subscriptions( self.input_folder + "eval/task_subscription.sparql" )
         for _ in range(self.number_of_providers-1):
             self.space.subscribe( subscription_for_replicas , None ) # will not be activated, so callback==None
