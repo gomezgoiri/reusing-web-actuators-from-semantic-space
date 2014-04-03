@@ -38,7 +38,7 @@ class SpaceRequests(object):
         # self.nodes_involved = 2
         self.requests_to_activate = {}
         self.requests_to_activate['per_consumer'] = 3 # write task, subscribe to result, read result 
-        self.requests_to_activate['per_provider'] = 2 # (subscribe to task already counted), read task, write result
+        self.requests_to_activate['per_provider'] = 2 # (subscribe to task already counted below), read task, write result
         self.requests_to_activate['per_space'] = 2 # notification on task, notification on result
     
     def get_requests(self):
@@ -57,7 +57,10 @@ if __name__ == '__main__':
     rng[0] = 1
     
     rest = RESTRequests( rng,
-                        10, # One for each OPTIONS and GET verb of each resource
+                        5, # One for each OPTIONS and GET verb of each resource,
+                           # supposing that they only provide one measure at a time.
+                           # /lamp (GET), /lamp/actuators (GET), /lamp/actuators/light (GET, OPTIONS), /lamp/actuators/light/01 (GET)
+
                             # Anyway, this can be improved redesigning the API
                         2 ) # The actuation in our scenario is composed by two requests
     space = SpaceRequests( rng,
@@ -73,5 +76,5 @@ if __name__ == '__main__':
     data['space']['requests'] = space.get_requests()
     
     print data
-    d = DiagramGenerator("Network usage by strategies", data)
-    d.save('/tmp/requests_by_strategies.pdf')
+    d = DiagramGenerator("Network usage by strategies", data, ylabel_name="Requests")
+    d.save('/tmp/requests_by_techniques.svg')

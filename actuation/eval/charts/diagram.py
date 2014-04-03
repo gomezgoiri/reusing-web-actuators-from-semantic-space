@@ -45,14 +45,14 @@ class DiagramGenerator:
     #                     DiagramGenerator.OURS_10C,
     #                     DiagramGenerator.OURS_1C,
     #                     DiagramGenerator.NB_CACHING_1C )
-    def __init__(self, title, data, desired_order=None):
+    def __init__(self, title, data, ylabel_name="seconds", desired_order=None):
         
         # http://colorschemedesigner.com/previous/colorscheme2/index-es.html?tetrad;100;0;225;0.3;-0.8;0.3;0.5;0.1;0.9;0.5;0.75;0.3;-0.8;0.3;0.5;0.1;0.9;0.5;0.75;0.3;-0.8;0.3;0.5;0.1;0.9;0.5;0.75;0.3;-0.8;0.3;0.5;0.1;0.9;0.5;0.75;0
         self.linesColors = ("#E6AC73", "#CFE673", "#507EA1", "#E67373", "#8A458A")
         # self.linesShapes = ('xk-','+k-.','Dk--') # avoiding spaghetti lines
         self.ci = ChartImprover( title = None, # title,
-                                 xlabel = 'Number of nodes',
-                                 ylabel = {"label": 'Requests', "x": -0.02, "y": 1.1},
+                                 xlabel = 'Number of actuators',
+                                 ylabel = {"label": ylabel_name, "x": -0.02, "y": 1.1},
                                  legend_from_to = (0.04, 1.0) )
         if not desired_order:
             desired_order = data.keys()
@@ -125,7 +125,7 @@ def main():
     with open('/tmp/results.json', 'r') as finput:
         json_txt = finput.read()
         d = DiagramGenerator("Network usage by strategies", eval(json_txt))
-        d.save('/tmp/requests_by_strategies.svg')
+        d.save('/tmp/performance_by_techniques.svg') # Or .svg or .pdf
 
 
 if __name__ == '__main__':   
